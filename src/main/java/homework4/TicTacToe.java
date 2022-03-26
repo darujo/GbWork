@@ -1,10 +1,12 @@
+package homework4;
+
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
 public class TicTacToe {
     private static final int SIZE = 5;
-    private static       int qntyWin = 4;
+    private static final int qntyWin = 4;
     private static final char CHAR_EMPTY = '•';
     private static final char CHAR_X     = 'X';
     private static final char CHAR_O     = 'O';
