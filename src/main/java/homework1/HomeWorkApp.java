@@ -1,5 +1,7 @@
+package homework1;
+
 public class HomeWorkApp {
-    public static void main(String args []) {
+    public static void main(String[] args) {
         printThreeWords();
         checkSumSign();
         for (int number1 = -3; number1 <= 3 ;number1++){
