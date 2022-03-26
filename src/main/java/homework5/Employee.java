@@ -1,7 +1,9 @@
+package homework5;
+
 public class Employee {
-    private String fio,position,email,tel;
-    private float salary;
-    private int age;
+    private final String fio,position,email,tel;
+    private final float salary;
+    private final int age;
 
     public Employee (String fio
                     ,String position
