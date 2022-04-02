@@ -16,64 +16,45 @@ public class SimpCount extends JFrame {
         setBounds(500,500,WIDTH_WINDOW ,HEIGHT_WINDOW );
         setTitle("Счетчик");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setLayout(null);
+//        setLayout(null);
 
         Font font = new Font("Arial", Font.BOLD, 32);
 
         JButton zeroButton = new JButton("Сброс");
         zeroButton.setFont(font);
-        zeroButton.setBounds(0, HEIGHT_WINDOW - HEIGHT_BUTTON-HEIGHT_HEAD, WIDTH_WINDOW,HEIGHT_BUTTON);
-        add(zeroButton);
+        add(zeroButton,BorderLayout.SOUTH);
 
         JLabel counterValueView = new JLabel();
         counterValueView.setFont(font);
         counterValueView.setHorizontalAlignment(SwingConstants.CENTER);
-        counterValueView.setBounds(WIDTH_BUTTON
-                              , (int) ((HEIGHT_WINDOW )/2 -0.75*HEIGHT_BUTTON)
-
-                              , WIDTH_WINDOW - 2* WIDTH_BUTTON
-                              ,HEIGHT_BUTTON);
-        add(counterValueView);
+        add(counterValueView,BorderLayout.CENTER);
         counterValueView.setText(String.valueOf(value));
 
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new GridLayout(1,2));
+        this.add (northPanel,BorderLayout.NORTH);
         JButton decrement10Button = new JButton("<<");
         decrement10Button.setFont(font);
-        decrement10Button.setBounds(0
-                ,0
-                ,WIDTH_WINDOW/2
-                ,HEIGHT_BUTTON);
-        add(decrement10Button);
+        northPanel.add(decrement10Button,BorderLayout.NORTH);
 
         JButton decrementButton = new JButton("<");
         decrementButton.setFont(font);
-        decrementButton.setBounds(0
-                                 ,HEIGHT_BUTTON
-                                 , WIDTH_BUTTON
-                                 ,HEIGHT_WINDOW-2*HEIGHT_BUTTON-HEIGHT_HEAD
-        );
-        add(decrementButton);
+        add(decrementButton,BorderLayout.WEST);
 
         JButton increment10Button = new JButton(">>");
         increment10Button.setFont(font);
-        increment10Button.setBounds(WIDTH_WINDOW/2
-                                    ,0
-                                    ,WIDTH_WINDOW/2
-                                    ,HEIGHT_BUTTON);
-        add(increment10Button);
+        northPanel.add(increment10Button,BorderLayout.EAST);
 
         JButton incrementButton = new JButton(">");
         incrementButton.setFont(font);
-        incrementButton.setBounds(WIDTH_WINDOW-WIDTH_BUTTON -15
-                                 , HEIGHT_BUTTON
-                                 , WIDTH_BUTTON
-                                 ,HEIGHT_WINDOW-2*HEIGHT_BUTTON-HEIGHT_HEAD);
         add(incrementButton,BorderLayout.EAST);
+
         ActionListener listner = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 if (e.getSource() == increment10Button){
-                    value *=11;
+                    value +=10;
                 }
                 else if (e.getSource() == incrementButton){
                   value++;
