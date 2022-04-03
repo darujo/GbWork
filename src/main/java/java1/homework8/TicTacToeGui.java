@@ -201,13 +201,18 @@ public class TicTacToeGui {
 
     private void computerTurn() {
         String player;
+        if  (TicTacToe.isNotEmpty()){
+            return;
+        }
         if ((player2Computer && actionNextSet == TicTacToe.CHAR_O)
            || (player1Computer && actionNextSet == TicTacToe.CHAR_X))
         {
             player = (actionNextSet==TicTacToe.CHAR_O) ? "Компьютер 1" :"Компьютер 2";
 
             turnMap(player,TicTacToe.computerTurn(getNextChar()));
-            checkWin( player);
+            if(checkWin( player)){
+                return;
+            }
         }
         if (player1Computer && player2Computer){
             while(true){
