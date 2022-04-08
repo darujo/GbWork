@@ -1,3 +1,4 @@
+package java1.homework6;
 public class Cat extends Animal {
     private static int count = 0;
     private final int MAX_LENGTH_RUN  = 100;

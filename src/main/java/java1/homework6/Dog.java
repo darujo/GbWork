@@ -1,3 +1,4 @@
+package java1.homework6;
 public class Dog extends Animal{
     private static int count;
     public Dog(String name) {
