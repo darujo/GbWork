@@ -1,6 +1,6 @@
 package java1.homework8;
 
-import homework4.TicTacToe;
+import java1.homework4.TicTacToe;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
