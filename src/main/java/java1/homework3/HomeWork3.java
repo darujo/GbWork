@@ -1,6 +1,5 @@
-package homework3;
+package java1.homework3;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class HomeWork3 {
