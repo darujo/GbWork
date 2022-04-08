@@ -281,6 +281,7 @@ public class TicTacToeGui {
 
     }
         private void startNewGame (){
+        gameStateLabel.setText(START_GAME_MSG);
         actionNextSet= TicTacToe.CHAR_X;
         setEnable(true);
         initMap();
