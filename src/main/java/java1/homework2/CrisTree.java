@@ -1,4 +1,4 @@
-package homework2;
+package java1.homework2;
 
 class CrisTree {
     public static void main(String[] args) {
