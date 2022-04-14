@@ -1,7 +1,5 @@
 package java1.homework7;
 
-import com.sun.org.apache.bcel.internal.generic.RETURN;
-
 public class Cat {
     private final String name;
     private final int appetite;
