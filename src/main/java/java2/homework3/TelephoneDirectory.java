@@ -10,9 +10,7 @@ public class TelephoneDirectory {
         Set<String> listPhone = listPeople.get(firstName);
         if (listPhone == null){
             listPhone = new HashSet<>();
-            listPhone.add(Phone);
             listPeople.put(firstName,listPhone);
-            return;
         }
         listPhone.add(Phone);
     }
