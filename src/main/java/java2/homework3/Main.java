@@ -11,7 +11,7 @@ public class Main {
         for (int i = 0; i < arrayText.length; i++) {
             arrayText[i] = arrayMonth[rand.nextInt(arrayMonth.length )];
         }
-        HashMap<String, Integer> listMonth = new HashMap<>();
+        Map<String, Integer> listMonth = new HashMap<>();
 
 
         System.out.println(Arrays.toString(arrayText));
