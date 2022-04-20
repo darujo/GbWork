@@ -9,5 +9,8 @@
         <module name="GbWork" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ClientChat" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>
