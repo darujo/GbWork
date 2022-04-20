@@ -35,17 +35,8 @@ public class ClientCharController {
             textMessageAria.appendText(System.lineSeparator());
             sendMessageText.setText("");
         }
-//        sendMessageText.requestFocus();
+        sendMessageText.requestFocus();
 
-        requestFocus();
-    }
-    private void requestFocus(){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                sendMessageText.requestFocus();
-            }
-        });
-    }
 
+    }
 }
