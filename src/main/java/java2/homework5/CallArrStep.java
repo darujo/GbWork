@@ -1,7 +1,7 @@
 package java2.homework5;
 
-public class CallArrStep implements CheckSpeed{
-    private final float [] workArr;
+public class CallArrStep implements CheckSpeed {
+    private final float[] workArr;
     private final int quantityStream;
 
     public CallArrStep(float[] workArr, int quantityStream) {
@@ -10,10 +10,10 @@ public class CallArrStep implements CheckSpeed{
     }
 
     @Override
-    public void run()  {
-        Thread [] thread =new Thread[quantityStream];
+    public void run() {
+        Thread[] thread = new Thread[quantityStream];
         for (int i = 0; i < quantityStream; i++) {
-            thread[i] =new Thread(new ThreadCalculationArrStep(i  ,quantityStream,workArr));
+            thread[i] = new Thread(new ThreadCalculationArrStep(i, quantityStream, workArr));
         }
         for (int i = 0; i < quantityStream; i++) {
             thread[i].start();
@@ -31,6 +31,6 @@ public class CallArrStep implements CheckSpeed{
 
     @Override
     public String toString() {
-        return "Расчет массива в " + quantityStream + " потоках" ;
+        return "Расчет массива в " + quantityStream + " потоках";
     }
 }
