@@ -66,8 +66,8 @@ public class TicTacToeController {
                     }
                     else {
 
-                        final int y = i;
-                        final int x = j;
+                        final int y = j;
+                        final int x = i;
                         cell.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
                             public void handle(ActionEvent actionEvent) {
@@ -80,7 +80,7 @@ public class TicTacToeController {
                                     turnMap(cell);
                                     player = (actionNextSet == TicTacToe.CHAR_O ) ? "Игрок 1": "Игрок 2";
                                     printTurn(player,y,x);
-                                    TicTacToe.setMap(y, x, actionNextSet, player);
+                                    TicTacToe.setMap( y,x, actionNextSet, player);
                                     if (checkWin(player)){
                                         return;
                                     }
@@ -171,8 +171,8 @@ public class TicTacToeController {
         }
     }
     private void turnMap(String player,int []cell){
-        turnMap(gameField[cell[0]+1][cell[1]+1]);
-        printTurn( player ,   cell[0]+ 1,  cell[1]+1 );
+        turnMap(gameField[cell[1]+1][cell[0]+1]);
+        printTurn( player ,   cell[1]+ 1,  cell[0]+1 );
     }
     private void printTurn (String player,int y, int x){
         gameStateLabel.setText("Предыдущий ход " + player  + " : Y "+ y + " X " + x );
