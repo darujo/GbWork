@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="200.0" minWidth="250.0" prefHeight="400.0" prefWidth="602.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.darujo.clietnchat.clientchat.ClientCharController">
+   <center>
+      <TextArea fx:id="textMessageAria" editable="false" minHeight="150.0" minWidth="130.0" prefHeight="200.0" prefWidth="20.0" style="-fx-border-width: 2px;" wrapText="true" BorderPane.alignment="CENTER" />
+   </center>
+   <top>
+      <Label alignment="CENTER" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="130.0" text="Онлайн чат DARU" textAlignment="CENTER" BorderPane.alignment="CENTER" />
+   </top>
+   <left>
+      <ListView fx:id="userList" minHeight="150.0" prefHeight="355.0" prefWidth="133.0" BorderPane.alignment="CENTER" />
+   </left>
+   <right>
+      <AnchorPane maxWidth="1.7976931348623157E308" prefHeight="24.0" BorderPane.alignment="CENTER" />
+   </right>
+   <bottom>
+      <SplitPane dividerPositions="0.5" maxWidth="1.7976931348623157E308" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="28.0" prefWidth="20.0"  BorderPane.alignment="CENTER">
+         <items>
+            <TextField fx:id="sendMessageText" maxWidth="1.7976931348623157E308" minWidth="30.0" prefHeight="25.0" prefWidth="534.0" />
+            <Button fx:id="sendMessageButton" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#appendMessageToChar" prefWidth="100.0" text="Отправить" />
+         </items>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+      </SplitPane>
+   </bottom>
+</BorderPane>
