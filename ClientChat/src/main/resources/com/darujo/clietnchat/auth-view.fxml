@@ -2,13 +2,32 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="202.0" prefWidth="317.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.darujo.clietnchat.controller.AuthController">
     <children>
-        <Label layoutX="21.0" layoutY="25.0" prefHeight="17.0" prefWidth="55.0" text="Логин:" AnchorPane.bottomAnchor="160.0" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="25.0" />
-        <Label layoutX="18.0" layoutY="82.0" text="Пароль:" AnchorPane.leftAnchor="18.0" AnchorPane.topAnchor="82.0" />
-        <TextField fx:id="loginField" layoutX="87.0" layoutY="21.0" />
-        <PasswordField fx:id="passwordField" layoutX="87.0" layoutY="78.0" />
-        <Button fx:id="authButton" layoutX="88.0" layoutY="150.0" mnemonicParsing="false" onAction="#executeAuth" prefHeight="25.0" prefWidth="149.0" text="Войти!" />
+        <Label alignment="CENTER_RIGHT" layoutX="21.0" layoutY="25.0" prefHeight="17.0" prefWidth="55.0" text="Логин:" textAlignment="RIGHT" AnchorPane.bottomAnchor="161.0" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="24.0" />
+        <Label alignment="TOP_RIGHT" layoutX="18.0" layoutY="82.0" text="Пароль:" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="64.0" />
+        <TextField fx:id="loginField" layoutX="87.0" layoutY="21.0" onKeyReleased="#checkLogin" AnchorPane.topAnchor="20.0" />
+        <PasswordField fx:id="passwordField" layoutX="87.0" layoutY="78.0" onKeyReleased="#checkPassword" AnchorPane.topAnchor="60.0" />
+        <Button fx:id="authButton" layoutX="88.0" layoutY="150.0" mnemonicParsing="false" onAction="#executeAuth" prefHeight="25.0" prefWidth="60.0" text="Войти" />
+      <Button fx:id="registration" layoutX="150.0" layoutY="150.0" mnemonicParsing="false" onAction="#executeRegistration" text="Регистрация" />
+      <Label fx:id="userNameLabel" alignment="CENTER_RIGHT" layoutX="20.0" layoutY="104.0" text="Имя:" visible="false" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="242.0" AnchorPane.topAnchor="104.0" />
+      <TextField fx:id="userNameField" layoutX="87.0" layoutY="101.0" onKeyReleased="#checkUserName" visible="false" AnchorPane.topAnchor="100.0" />
+      <Label fx:id="badLoginLabel" layoutX="236.0" layoutY="19.0" text="!" textFill="RED">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="badPasswordLabel" layoutX="236.0" layoutY="59.0" text="!" textFill="RED">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="badUserNameLabel" layoutX="236.0" layoutY="99.0" text="!" textFill="RED" visible="false">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>

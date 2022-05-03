@@ -1,5 +1,6 @@
 package com.darujo.clietnchat.controller;
 
+import com.darujo.clietnchat.ClientChat;
 import com.darujo.command.Command;
 import com.darujo.command.CommandType;
 import com.darujo.command.commands.ClientMessageCommand;
@@ -34,9 +35,12 @@ public class ClientCharController {
 
     @FXML
     public ListView<String> userList;
+    @FXML
+    public Button SendAll;
 
     private ClientHandler clientHandler;
 
+    @FXML
     public void appendMessageToChar(ActionEvent actionEvent) {
         if (!sendMessageText.getText().isEmpty()) {
             if (!userList.getSelectionModel().isEmpty()) {
@@ -50,17 +54,22 @@ public class ClientCharController {
                     }
                 }
             } else {
-                try {
-                    clientHandler.sendCommand(Command.getPublicMessageCommand(sendMessageText.getText()));
-                    printMessage("Я: ", sendMessageText.getText());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ClientChat.showMessage("Не выбран получатель");
             }
-
-
         }
+        requestFocus();
+    }
 
+    @FXML
+    public void SendMessageAll(ActionEvent actionEvent) {
+        if (!sendMessageText.getText().isEmpty()) {
+            try {
+                clientHandler.sendCommand(Command.getPublicMessageCommand(sendMessageText.getText()));
+                printMessage("Я: ", sendMessageText.getText());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         requestFocus();
     }
 
@@ -83,7 +92,7 @@ public class ClientCharController {
             if (command.getType() == CommandType.UPDATE_USERS_LIST) {
                 UpdateUserListCommandData data = (UpdateUserListCommandData) command.getData();
                 Platform.runLater(() ->
-                    userList.setItems(FXCollections.observableArrayList(data.getUsers()))
+                        userList.setItems(FXCollections.observableArrayList(data.getUsers()))
                 );
             } else if (command.getType() == CommandType.CLIENT_MESSAGE) {
                 ClientMessageCommand clientMessageCommand = (ClientMessageCommand) command.getData();

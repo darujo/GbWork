@@ -9,7 +9,7 @@ public class Command implements Serializable {
     private final Object data;
     private final CommandType type;
 
-    private Command(CommandType type, Object data) {
+    private Command(CommandType type, Serializable data) {
         this.data = data;
         this.type = type;
     }
@@ -60,5 +60,9 @@ public class Command implements Serializable {
 
     public static Command getPublicMessageCommand(String message) {
         return new Command(CommandType.PUBLIC_MESSAGE, new PublicMessageCommand(message));
+    }
+
+    public static Command getRegistrationUserCommand(String login, String password, String userName) {
+        return new Command(CommandType.REGISTRATION_USER, new RegistrationUser(login, password, userName));
     }
 }

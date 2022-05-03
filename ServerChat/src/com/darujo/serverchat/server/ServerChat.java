@@ -5,7 +5,7 @@ import com.darujo.command.CommandType;
 import com.darujo.command.commands.AuthCommandData;
 import com.darujo.command.commands.PrivateMessageCommand;
 import com.darujo.command.commands.PublicMessageCommand;
-import com.darujo.event.Event;
+import com.darujo.command.commands.RegistrationUser;
 import com.darujo.event.EventType;
 import com.darujo.network.ClientHandler;
 import com.darujo.network.Network;
@@ -32,6 +32,8 @@ public class ServerChat {
                     sendPrivateMessage(clientHandler, (PrivateMessageCommand) command.getData());
                 } else if (command.getType() == CommandType.PUBLIC_MESSAGE) {
                     sendPublicMessage(clientHandler, (PublicMessageCommand) command.getData());
+                } else if (command.getType() == CommandType.REGISTRATION_USER) {
+                    registrationAndSendAnswer(clientHandler, (RegistrationUser) command.getData());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -41,10 +43,10 @@ public class ServerChat {
             try {
                 if (event.getEventType() == EventType.ADD_CLIENT_HANDLER) {
 
-                    addClient(event);
+                    addClient((ClientHandler) event.getData());
 
                 } else if (event.getEventType() == EventType.REMOVE_CLIENT_HANDLER) {
-                    removeClient(event);
+                    removeClient((ClientHandler) event.getData());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -53,12 +55,22 @@ public class ServerChat {
         network.createSocketServer();
     }
 
+    private void registrationAndSendAnswer(ClientHandler clientHandler, RegistrationUser data) throws IOException {
+        AuthCenter authCenter = AuthCenter.getInstance();
+        AuthCenter.AuthMessage authMessage = authCenter.registrationUser(data.getLogin(), data.getPassword(), data.getUserName());
+        String userName = authCenter.getUserName(data.getLogin());
+        authSendAnswer(clientHandler, userName, authMessage);
+    }
 
     private void authAndSendAnswer(ClientHandler clientHandler, AuthCommandData data) throws IOException {
         AuthCenter authCenter = AuthCenter.getInstance();
         AuthCenter.AuthMessage authMessage = authCenter.availableUser(data.getLogin(), data.getPassword());
+        String userName = authCenter.getUserName(data.getLogin());
+        authSendAnswer(clientHandler, userName, authMessage);
+    }
+
+    private void authSendAnswer(ClientHandler clientHandler, String userName, AuthCenter.AuthMessage authMessage) throws IOException {
         if (authMessage == AuthCenter.AuthMessage.AUTH_OK) {
-            String userName = authCenter.getUserName(data.getLogin());
             if (isUserWork(userName)) {
                 clientHandler.sendCommand(
                         Command.getErrorMessageCommand("Пользователь уже работает на другом устройстве"));
@@ -68,15 +80,23 @@ public class ServerChat {
                 authClient(clientHandler, userName);
             }
         } else if (authMessage == AuthCenter.AuthMessage.INVALID_LOGIN) {
-            Command command = Command.getAuthNoUserCommand(AuthCenter.AuthMessage.INVALID_LOGIN.getMessage());
+            Command command = Command.getAuthNoUserCommand(authMessage.getMessage());
             clientHandler.sendCommand(command);
         } else {
-            clientHandler.sendCommand(Command.getErrorMessageCommand(CommandType.ERROR_MESSAGE, AuthCenter.AuthMessage.INVALID_PASSWORD.getMessage()));
+            CommandType commandType;
+            if (authMessage == AuthCenter.AuthMessage.LOGIN_IS_BUSY) {
+                commandType = CommandType.LOGIN_IS_BUSY;
+            } else if (authMessage == AuthCenter.AuthMessage.USER_NAME_IS_BUSY) {
+                commandType = CommandType.USER_NAME_IS_BUSY;
+            } else {
+                commandType = CommandType.ERROR_MESSAGE;
+            }
+            clientHandler.sendCommand(Command.getErrorMessageCommand(commandType, authMessage.getMessage()));
         }
     }
 
-    private synchronized void addClient(Event event) throws IOException {
-        connectClients.put((ClientHandler) event.getData(), new ParamConnectClient());
+    private synchronized void addClient(ClientHandler clientHandler) throws IOException {
+        connectClients.put(clientHandler, new ParamConnectClient());
         notifyUserListUpdatedAllUser();
     }
 
@@ -92,8 +112,8 @@ public class ServerChat {
         notifyUserListUpdatedAllUser();
     }
 
-    private synchronized void removeClient(Event event) throws IOException {
-        connectClients.remove((ClientHandler) event.getData());
+    private synchronized void removeClient(ClientHandler clientHandler) throws IOException {
+        connectClients.remove(clientHandler);
         notifyUserListUpdatedAllUser();
     }
 
