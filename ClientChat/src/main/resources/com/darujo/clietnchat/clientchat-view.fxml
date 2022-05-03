@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="200.0" minWidth="250.0" prefHeight="400.0" prefWidth="602.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.darujo.clietnchat.clientchat.ClientCharController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="200.0" minWidth="250.0" prefHeight="400.0" prefWidth="602.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.darujo.clietnchat.controller.ClientCharController">
    <center>
       <TextArea fx:id="textMessageAria" editable="false" minHeight="150.0" minWidth="130.0" prefHeight="200.0" prefWidth="20.0" style="-fx-border-width: 2px;" wrapText="true" BorderPane.alignment="CENTER" />
    </center>
