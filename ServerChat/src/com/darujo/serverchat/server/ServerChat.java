@@ -12,13 +12,14 @@ import com.darujo.network.Network;
 import com.darujo.serverchat.server.auth.AuthCenter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ServerChat {
     Map<ClientHandler, ParamConnectClient> connectClients = new HashMap<>();
+
+    private final long TIMER_OUT_AUTH = 120; // seconds
+    private final long TIMER_EXECUTION_FREQUENCY = 5; // seconds
+    private Timer timer;
 
     public ServerChat() {
         Network network = Network.getNetwork();
@@ -42,7 +43,7 @@ public class ServerChat {
         network.addReaderEvent(event -> {
             try {
                 if (event.getEventType() == EventType.ADD_CLIENT_HANDLER) {
-
+                    createTimer();
                     addClient((ClientHandler) event.getData());
 
                 } else if (event.getEventType() == EventType.REMOVE_CLIENT_HANDLER) {
@@ -53,6 +54,34 @@ public class ServerChat {
             }
         });
         network.createSocketServer();
+    }
+
+    private void createTimer() {
+        if (timer == null) {
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
+                        ParamConnectClient paramConnectClient = connectClient.getValue();
+                        if (!paramConnectClient.getAuthOk() && paramConnectClient.getConnectTime() + TIMER_OUT_AUTH * 1000 < System.currentTimeMillis()) {
+                            ClientHandler clientHandler = connectClient.getKey();
+                            try {
+                                clientHandler.sendCommand(Command.getErrorMessageCommand("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."));
+                                System.out.println("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."
+                                        + " Время подключения " + new Date(paramConnectClient.getConnectTime())
+                                        + " текущее время " + new Date(System.currentTimeMillis()));
+                                clientHandler.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            };
+            timer = new Timer(true);
+            timer.scheduleAtFixedRate(timerTask, 0, TIMER_EXECUTION_FREQUENCY * 1000);
+
+        }
     }
 
     private void registrationAndSendAnswer(ClientHandler clientHandler, RegistrationUser data) throws IOException {
@@ -76,7 +105,6 @@ public class ServerChat {
                         Command.getErrorMessageCommand("Пользователь уже работает на другом устройстве"));
             } else {
                 clientHandler.sendCommand(Command.getAuthOkCommand(userName));
-                Network.getNetwork().addClientHandler(clientHandler);
                 authClient(clientHandler, userName);
             }
         } else if (authMessage == AuthCenter.AuthMessage.INVALID_LOGIN) {
