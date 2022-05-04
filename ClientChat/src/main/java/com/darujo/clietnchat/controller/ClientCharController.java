@@ -47,7 +47,7 @@ public class ClientCharController {
                 for (String item : selected) {
                     try {
                         clientHandler.sendCommand(Command.getPrivateMessageCommand(item, sendMessageText.getText()));
-                        printMessage("Я -> " + item , sendMessageText.getText());
+                        printMessage("Я -> " + item, sendMessageText.getText());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

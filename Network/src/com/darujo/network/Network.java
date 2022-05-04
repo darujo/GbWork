@@ -49,7 +49,7 @@ public class Network {
             lastClientHandler = workSocket(false);
             return lastClientHandler;
         } catch (IOException e) {
-            printErrorLog(NetError.SERVER_CONNECT,SERVER_ADR + ":" + SERVER_PORT);
+            printErrorLog(NetError.SERVER_CONNECT, SERVER_ADR + ":" + SERVER_PORT);
 
         }
         return null;
@@ -61,13 +61,15 @@ public class Network {
         clientHandler.readSocket();
         return clientHandler;
     }
-    public void printErrorLog(NetError netError){
-        printErrorLog(netError,"");
+
+    public void printErrorLog(NetError netError) {
+        printErrorLog(netError, "");
     }
-    public void printErrorLog(NetError netError,String afterText) {
+
+    public void printErrorLog(NetError netError, String afterText) {
         String text = netError.getMessage(afterText);
         if (logErrorPrinter != null) {
-            logErrorPrinter.print(netError,text);
+            logErrorPrinter.print(netError, text);
         }
         System.out.println(text);
 
