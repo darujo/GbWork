@@ -35,7 +35,9 @@ public class ClientCharController {
     @FXML
     public Button SendAll;
     @FXML
-    public Button changeUserButton;
+    public MenuItem changeUserButton;
+    @FXML
+    public MenuItem closeMenuButton;
 
     private ClientHandler clientHandler;
 
@@ -120,5 +122,9 @@ public class ClientCharController {
             ClientChat.getInstance().authShow();
             textMessageAria.clear();
         });
+    }
+
+    public void actionClose(ActionEvent actionEvent) {
+        ClientChat.getInstance().getChatStage().close();
     }
 }

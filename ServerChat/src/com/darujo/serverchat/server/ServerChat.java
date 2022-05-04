@@ -71,7 +71,7 @@ public class ServerChat {
 
     private void authSendAnswer(ClientHandler clientHandler, String userName, AuthCenter.AuthMessage authMessage) throws IOException {
         if (authMessage == AuthCenter.AuthMessage.AUTH_OK) {
-            if (isUserWork(userName)) {
+            if (isUserWork(userName, clientHandler)) {
                 clientHandler.sendCommand(
                         Command.getErrorMessageCommand("Пользователь уже работает на другом устройстве"));
             } else {
@@ -125,11 +125,13 @@ public class ServerChat {
         sendCommandAllAuthUser(Command.getUpdateUserListCommand(notifyUserListUpdated()), null);
     }
 
-    private boolean isUserWork(String senderName) {
+    private boolean isUserWork(String senderName, ClientHandler clientHandler) {
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
-            String userName = connectClient.getValue().getUserName();
-            if (userName != null && userName.equals(senderName)) {
-                return true;
+            if (connectClient.getKey() != clientHandler) {
+                String userName = connectClient.getValue().getUserName();
+                if (userName != null && userName.equals(senderName)) {
+                    return true;
+                }
             }
         }
         return false;

@@ -101,8 +101,9 @@ public class AuthController {
         clientHandler.sendCommand(Command.getAuthCommand(loginField.getText(), passwordField.getText()));
     }
 
-    public void reShow(){
+    public void reShow() {
         Network.getNetwork().addReaderMessage(readerMessage);
+        passwordField.setText("");
     }
 
     private void connectServer() {

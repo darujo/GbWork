@@ -27,11 +27,20 @@
       </SplitPane>
    </bottom>
    <top>
-      <SplitPane dividerPositions="0.24833333333333332" prefHeight="28.0" prefWidth="602.0" BorderPane.alignment="CENTER">
+      <SplitPane dividerPositions="0.11833333333333333" prefHeight="28.0" prefWidth="602.0" BorderPane.alignment="CENTER">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <Button fx:id="changeUserButton" layoutX="-3.0" layoutY="-2.0" mnemonicParsing="false" onAction="#changeUser" prefHeight="25.0" prefWidth="136.0" text="Сменить пользователя" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <MenuBar AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <menus>
+                      <Menu mnemonicParsing="false" text="Меню">
+                        <items>
+                          <MenuItem fx:id="changeUserButton" mnemonicParsing="false" onAction="#changeUser" text="Сменить пользователя" />
+                          <MenuItem fx:id="closeMenuButton" mnemonicParsing="false" onAction="#actionClose" text="Выход" />
+                        </items>
+                      </Menu>
+                    </menus>
+                  </MenuBar>
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="37.0" prefWidth="464.0">
