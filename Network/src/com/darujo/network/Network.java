@@ -7,22 +7,20 @@ import com.darujo.event.ReaderEvent;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Network {
 
     private static final String SERVER_ADR = "localhost";
     private static final int SERVER_PORT = 8189;
-    public Consumer<String> logErrorPrinter;
-    public List<ReaderMessage> readerMessages = new ArrayList<>();
+    public ErrorPrinter logErrorPrinter;
     private static Socket socket;
-    private List<ReaderMessage> messageListeners;
+    private final Set<ReaderMessage> messageListeners = new CopyOnWriteArraySet<>();
     private ClientHandler lastClientHandler;
-    private final List<ClientHandler> clientHandlers = new ArrayList<>();
-    private final List<ReaderEvent> eventListeners = new ArrayList<>();
+    private final Set<ClientHandler> clientHandlers = new HashSet<>();
+    private final Set<ReaderEvent> eventListeners = new HashSet<>();
 
     private static Network instance;
 
@@ -37,8 +35,7 @@ public class Network {
             while (true) {
                 System.out.println("Ожидаем подключения.");
                 socket = serverSocket.accept();
-                System.out.println("Клиент подключился");
-                workSocket(false);
+                System.out.println("Клиент подключился. " + workSocket(false));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,12 +45,11 @@ public class Network {
     public ClientHandler createSocketClient() {
         try {
             socket = new Socket(SERVER_ADR, SERVER_PORT);
-            System.out.println("Сооединение с " + SERVER_ADR + ":" + SERVER_PORT + " установлено");
-            messageListeners = new CopyOnWriteArrayList<>();
+            System.out.println("Сооединение с " + SERVER_ADR + ":" + SERVER_PORT + " установлено.");
             lastClientHandler = workSocket(false);
             return lastClientHandler;
         } catch (IOException e) {
-            printErrorLog(NetError.SERVER_CONNECT.getMessage(SERVER_ADR + ":" + SERVER_PORT));
+            printErrorLog(NetError.SERVER_CONNECT,SERVER_ADR + ":" + SERVER_PORT);
 
         }
         return null;
@@ -63,17 +59,17 @@ public class Network {
         ClientHandler clientHandler = new ClientHandler(socket, instance, messageListeners);
         clientHandler.handle(isServer);
         clientHandler.readSocket();
-        for (ReaderMessage readerMessage : readerMessages) {
-            clientHandler.addReaderMessage(readerMessage);
-        }
         return clientHandler;
     }
-
-    public void printErrorLog(String str) {
+    public void printErrorLog(NetError netError){
+        printErrorLog(netError,"");
+    }
+    public void printErrorLog(NetError netError,String afterText) {
+        String text = netError.getMessage(afterText);
         if (logErrorPrinter != null) {
-            logErrorPrinter.accept(str);
+            logErrorPrinter.print(netError,text);
         }
-        System.out.println(str);
+        System.out.println(text);
 
     }
 
@@ -84,7 +80,7 @@ public class Network {
         return instance;
     }
 
-    public static Network getNetwork(Consumer<String> logErrorPrinter) {
+    public static Network getNetwork(ErrorPrinter logErrorPrinter) {
         if (instance == null) {
             instance = new Network();
         }

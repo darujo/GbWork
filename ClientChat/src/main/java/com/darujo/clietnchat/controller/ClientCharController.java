@@ -12,10 +12,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,6 +34,8 @@ public class ClientCharController {
     public ListView<String> userList;
     @FXML
     public Button SendAll;
+    @FXML
+    public Button changeUserButton;
 
     private ClientHandler clientHandler;
 
@@ -48,11 +47,12 @@ public class ClientCharController {
                 for (String item : selected) {
                     try {
                         clientHandler.sendCommand(Command.getPrivateMessageCommand(item, sendMessageText.getText()));
-                        printMessage("Я -> " + item + ": ", sendMessageText.getText());
+                        printMessage("Я -> " + item , sendMessageText.getText());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
+                sendMessageText.setText("");
             } else {
                 ClientChat.showMessage("Не выбран получатель");
             }
@@ -65,7 +65,8 @@ public class ClientCharController {
         if (!sendMessageText.getText().isEmpty()) {
             try {
                 clientHandler.sendCommand(Command.getPublicMessageCommand(sendMessageText.getText()));
-                printMessage("Я: ", sendMessageText.getText());
+                printMessage("Я", sendMessageText.getText());
+                sendMessageText.setText("");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -80,7 +81,7 @@ public class ClientCharController {
         textMessageAria.appendText(message);
         textMessageAria.appendText(System.lineSeparator());
         textMessageAria.appendText(System.lineSeparator());
-        sendMessageText.setText("");
+
     }
 
     private void requestFocus() {
@@ -97,7 +98,7 @@ public class ClientCharController {
             } else if (command.getType() == CommandType.CLIENT_MESSAGE) {
                 ClientMessageCommand clientMessageCommand = (ClientMessageCommand) command.getData();
                 Platform.runLater(() -> {
-                    String receiver = clientMessageCommand.isPrivateMessage() ? clientMessageCommand.getSender() + " -> мне: " : clientMessageCommand.getSender();
+                    String receiver = clientMessageCommand.isPrivateMessage() ? clientMessageCommand.getSender() + " -> мне" : clientMessageCommand.getSender();
                     printMessage(receiver, clientMessageCommand.getMessage());
                 });
 
@@ -111,5 +112,13 @@ public class ClientCharController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        userList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    }
+
+    public void changeUser(ActionEvent actionEvent) {
+        Platform.runLater(() -> {
+            ClientChat.getInstance().authShow();
+            textMessageAria.clear();
+        });
     }
 }

@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
 
 public class ClientHandler {
 
@@ -16,18 +15,13 @@ public class ClientHandler {
     private final Socket clientSocket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private final List<ReaderMessage> listeners;
+    private final Set<ReaderMessage> listeners;
 
 
     private final Network network;
 
-    public ClientHandler(Socket clientSocket, Network network, List<ReaderMessage> listeners) {
-        if (listeners != null) {
-            this.listeners = listeners;
-        } else {
-            this.listeners = new CopyOnWriteArrayList<>();
-        }
-
+    public ClientHandler(Socket clientSocket, Network network, Set<ReaderMessage> listeners) {
+        this.listeners = listeners;
         this.clientSocket = clientSocket;
         this.network = network;
     }
@@ -55,7 +49,7 @@ public class ClientHandler {
 
                 }
             } catch (IOException e) {
-                network.printErrorLog("Соединение разорвано");
+                network.printErrorLog(NetError.DISCONNECT);
                 e.printStackTrace();
             } finally {
                 try {
@@ -76,7 +70,7 @@ public class ClientHandler {
             try {
                 outputStream.writeObject(command);
             } catch (IOException e) {
-                network.printErrorLog(NetError.SEND_MESSAGE.getMessage());
+                network.printErrorLog(NetError.SEND_MESSAGE);
                 e.printStackTrace();
                 throw e;
             }
@@ -84,7 +78,7 @@ public class ClientHandler {
     }
 
     private void close() throws IOException {
-        System.out.println("Закрываем сооединение");
+        System.out.println("Закрываем соединение. " + this);
         Network.getNetwork().removeClientHandler(this);
         connected = false;
         inputStream.close();
@@ -95,7 +89,7 @@ public class ClientHandler {
         try {
             return (Command) inputStream.readObject();
         } catch (ClassNotFoundException e) {
-            network.printErrorLog("Получен не понятный объект");
+            network.printErrorLog(NetError.BAD_OBJECT);
             e.printStackTrace();
         }
         return null;

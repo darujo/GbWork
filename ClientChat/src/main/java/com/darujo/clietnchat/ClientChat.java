@@ -3,14 +3,17 @@ package com.darujo.clietnchat;
 import com.darujo.clietnchat.controller.AuthController;
 import com.darujo.clietnchat.controller.ClientCharController;
 import com.darujo.clietnchat.dialogs.Dialogs;
+import com.darujo.network.NetError;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -50,6 +53,12 @@ public class ClientChat extends Application {
         authStage.initOwner(chatStage);
         authStage.initModality(Modality.WINDOW_MODAL);
         authStage.setScene(new Scene(authDialogPanel));
+        authStage.setOnCloseRequest(windowEvent -> chatStage.close());
+    }
+
+    public void authShow(){
+        authStage.show();
+        getAuthController().reShow();
     }
 
     public static void main(String[] args) {
@@ -89,11 +98,11 @@ public class ClientChat extends Application {
     }
 
     public static void showMessage(String message) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message);
-            }
-        });
+        Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
+    }
+    public static void printNetError(NetError netError,String text){
+        if (netError != NetError.DISCONNECT){
+            showMessage(text);
+        }
     }
 }

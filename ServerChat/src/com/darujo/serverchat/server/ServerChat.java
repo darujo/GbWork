@@ -22,7 +22,7 @@ public class ServerChat {
 
     public ServerChat() {
         Network network = Network.getNetwork();
-        network.readerMessages.add((clientHandler, command) -> {
+        network.addReaderMessage((clientHandler, command) -> {
             try {
                 if (command.getType() == CommandType.AUTH) {
                     authAndSendAnswer(clientHandler, (AuthCommandData) command.getData());

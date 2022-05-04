@@ -8,11 +8,8 @@
    <center>
       <TextArea fx:id="textMessageAria" editable="false" minHeight="150.0" minWidth="130.0" prefHeight="200.0" prefWidth="20.0" style="-fx-border-width: 2px;" wrapText="true" BorderPane.alignment="CENTER" />
    </center>
-   <top>
-      <Label alignment="CENTER" maxWidth="1.7976931348623157E308" minWidth="130.0" prefWidth="130.0" text="Онлайн чат DARU" textAlignment="CENTER" BorderPane.alignment="CENTER" />
-   </top>
    <left>
-      <ListView fx:id="userList" minHeight="150.0" prefHeight="355.0" prefWidth="133.0" BorderPane.alignment="CENTER" />
+      <ListView fx:id="userList" minHeight="150.0" prefHeight="344.0" prefWidth="150.0" BorderPane.alignment="CENTER" />
    </left>
    <right>
       <AnchorPane maxWidth="1.7976931348623157E308" prefHeight="24.0" BorderPane.alignment="CENTER" />
@@ -29,4 +26,20 @@
          </BorderPane.margin>
       </SplitPane>
    </bottom>
+   <top>
+      <SplitPane dividerPositions="0.24833333333333332" prefHeight="28.0" prefWidth="602.0" BorderPane.alignment="CENTER">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <Button fx:id="changeUserButton" layoutX="-3.0" layoutY="-2.0" mnemonicParsing="false" onAction="#changeUser" prefHeight="25.0" prefWidth="136.0" text="Сменить пользователя" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="37.0" prefWidth="464.0">
+               <children>
+                  <Label alignment="CENTER" maxWidth="1.7976931348623157E308" minWidth="130.0" prefHeight="17.0" prefWidth="385.0" text="Онлайн чат DARU" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="79.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </top>
 </BorderPane>

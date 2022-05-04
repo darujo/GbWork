@@ -3,6 +3,7 @@ package com.darujo.serverchat.server;
 public class ParamConnectClient {
     private String userName;
     private Boolean authOk = false;
+    private final long connectTime = System.currentTimeMillis();
 
     public void setAuthOk(Boolean authOk) {
         this.authOk = authOk;
@@ -18,5 +19,9 @@ public class ParamConnectClient {
 
     public Boolean getAuthOk() {
         return authOk;
+    }
+
+    public long getConnectTime() {
+        return connectTime;
     }
 }

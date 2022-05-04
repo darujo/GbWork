@@ -17,9 +17,8 @@ import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
 
-
 public class AuthController {
-    private ReaderMessage readMessage;
+
     private ClientHandler clientHandler;
 
     @FXML
@@ -41,6 +40,55 @@ public class AuthController {
     @FXML
     public Button registration;
 
+    private final ReaderMessage readerMessage = (clientHandler, command) -> {
+        switch (command.getType()) {
+            case AUTH_OK: {
+
+                String userName = ((AuthOkCommandData) command.getData()).userName;
+                Platform.runLater(() ->
+                        ClientChat.getInstance().openChatWindow(userName)
+                );
+                break;
+
+            }
+            case AUTH_NO_USER: {
+                Platform.runLater(Dialogs.AuthError.INVALID_CREDENTIALS::show);
+                break;
+            }
+            case AUTH_INCORRECT_PASSWORD: {
+                Platform.runLater(() -> {
+                    Dialogs.AuthError.INVALID_CREDENTIALS.show();
+                    passwordField.requestFocus();
+                });
+                break;
+            }
+            case ERROR_MESSAGE: {
+                String message = ((ErrorCommandData) command.getData()).getText();
+                Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
+                break;
+            }
+            case LOGIN_IS_BUSY: {
+                String message = ((ErrorCommandData) command.getData()).getText();
+                Platform.runLater(() -> {
+                    badLoginLabel.setVisible(true);
+                    loginField.requestFocus();
+                    Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message);
+
+                });
+                break;
+            }
+            case USER_NAME_IS_BUSY: {
+                String message = ((ErrorCommandData) command.getData()).getText();
+                Platform.runLater(() -> {
+                    badUserNameLabel.setVisible(true);
+                    userNameField.requestFocus();
+                    Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message);
+
+                });
+            }
+        }
+    };
+
     @FXML
     public void executeAuth(ActionEvent actionEvent) throws IOException {
         if (isBadLoginField() || isBadPasswordField()) {
@@ -53,74 +101,33 @@ public class AuthController {
         clientHandler.sendCommand(Command.getAuthCommand(loginField.getText(), passwordField.getText()));
     }
 
+    public void reShow(){
+        Network.getNetwork().addReaderMessage(readerMessage);
+    }
+
     private void connectServer() {
-        Network network = Network.getNetwork(ClientChat::showMessage);
+        Network network = Network.getNetwork(ClientChat::printNetError);
 
-        readMessage = (clientHandler, command) -> {
-            switch (command.getType()) {
-                case AUTH_OK: {
+        network.addReaderEvent(event -> {
+            if (event.getEventType() == EventType.ADD_CLIENT_HANDLER) {
+                this.clientHandler = (ClientHandler) event.getData();
 
-                    String userName = ((AuthOkCommandData) command.getData()).userName;
-                    Platform.runLater(() ->
-                            ClientChat.getInstance().openChatWindow(userName)
-                    );
-                    break;
-
-                }
-                case AUTH_NO_USER: {
-                    Platform.runLater(Dialogs.AuthError.INVALID_CREDENTIALS::show);
-                    break;
-                }
-                case AUTH_INCORRECT_PASSWORD: {
+            } else if (event.getEventType() == EventType.REMOVE_CLIENT_HANDLER) {
+                if (this.clientHandler.equals(event.getData())) {
+                    this.clientHandler = null;
                     Platform.runLater(() -> {
-                        Dialogs.AuthError.INVALID_CREDENTIALS.show();
-                        passwordField.requestFocus();
-                    });
-                    break;
-                }
-                case ERROR_MESSAGE: {
-                    String message = ((ErrorCommandData) command.getData()).getText();
-                    Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
-                    break;
-                }
-                case LOGIN_IS_BUSY: {
-                    String message = ((ErrorCommandData) command.getData()).getText();
-                    Platform.runLater(() -> {
-                        badLoginLabel.setVisible(true);
-                        loginField.requestFocus();
-                        Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message);
-
-                    });
-                    break;
-                }
-                case USER_NAME_IS_BUSY: {
-                    String message = ((ErrorCommandData) command.getData()).getText();
-                    Platform.runLater(() -> {
-                        badUserNameLabel.setVisible(true);
-                        userNameField.requestFocus();
-                        Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message);
-
+                        ClientChat.getInstance().authShow();
+                        ClientChat.showMessage("Потеряна связь с сервером");
                     });
                 }
             }
-            network.addReaderEvent(event -> {
-                if (event.getEventType() == EventType.ADD_CLIENT_HANDLER) {
-                    this.clientHandler = (ClientHandler) event.getData();
-
-                } else if (event.getEventType() == EventType.REMOVE_CLIENT_HANDLER) {
-                    if (this.clientHandler.equals(event.getData())) {
-                        this.clientHandler = null;
-                    }
-                }
-            });
-
-        };
+        });
+        network.addReaderMessage(readerMessage);
         clientHandler = network.createSocketClient();
-        network.addReaderMessage(readMessage);
     }
 
     public void close() {
-        Network.getNetwork().removeReaderMessage(readMessage);
+        Network.getNetwork().removeReaderMessage(readerMessage);
     }
 
     @FXML
