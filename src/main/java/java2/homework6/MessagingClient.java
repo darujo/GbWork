@@ -1,9 +1,10 @@
 package java2.homework6;
 
-public class messagingServer {
+public class MessagingClient {
+
     public static void main(String[] args) {
         Network network = new Network();
-        network.createSocketServer();
+        network.createSocketClient();
         network.startExchange();
     }
 }

@@ -14,7 +14,6 @@ public class Network {
     private static final int SERVER_PORT = 8189;
 
 
-
     private static Socket socket;
     private final Consumer<String> writeMessage;
     private boolean stopExchange;
@@ -64,55 +63,38 @@ public class Network {
     }
 
     private void readSocket(Socket socket) throws IOException, InterruptedException {
-        DataInputStream in = new DataInputStream(socket.getInputStream());
-        Thread thread = new Thread(() -> {
-            try {
-                 while (!stopExchange) {
-                    try {
-                        String str = in.readUTF();
-                        if (str.equalsIgnoreCase("/end")) {
-                            writeMessage.accept("Получена команда на отключение");
-                            break;
-                        }
-                        writeMessage.accept(str);
-                    } catch (IOException e) {
-                        writeMessage.accept("Соединение разорвано");
-                        stopExchange = true;
-                    }
+        try (DataInputStream in = new DataInputStream(socket.getInputStream())) {
+            while (!stopExchange) {
+                String str = in.readUTF();
+                if (str.equalsIgnoreCase("/end")) {
+                    writeMessage.accept("Получена команда на отключение");
+                    break;
                 }
-            } finally {
-                try {
-                    stopExchange = true;
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                writeMessage.accept(str);
             }
-        });
-        thread.start();
-        thread.join();
+        } finally {
+            writeMessage.accept("Соединение разорвано");
+            stopExchange = true;
+        }
     }
 
     public void sendMessage(Socket socket) throws IOException {
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         Thread threadSend = new Thread(() -> {
-            try(Scanner scan = new Scanner(System.in)){
+            try (Scanner scan = new Scanner(System.in)) {
 
                 while (true) {
                     writeMessage.accept("Введите сообщение для отправки");
                     String str = scan.nextLine();
                     if (!stopExchange) {
-                        try {
-                            out.writeUTF(str);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        out.writeUTF(str);
                         if (str.equalsIgnoreCase("/end")) {
                             stopExchange = true;
                             break;
                         }
-                    } else
+                    } else {
                         break;
+                    }
                 }
                 out.close();
             } catch (IOException e) {
