@@ -77,7 +77,7 @@ public class ClientHandler {
         }
     }
 
-    private void close() throws IOException {
+    public void close() throws IOException {
         System.out.println("Закрываем соединение. " + this);
         Network.getNetwork().removeClientHandler(this);
         connected = false;
