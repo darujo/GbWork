@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Command implements Serializable {
-    private final Object data;
+    private final Serializable data;
     private final CommandType type;
 
     private Command(CommandType type, Serializable data) {
@@ -14,7 +14,7 @@ public class Command implements Serializable {
         this.type = type;
     }
 
-    public Object getData() {
+    public Serializable getData() {
         return data;
     }
 
