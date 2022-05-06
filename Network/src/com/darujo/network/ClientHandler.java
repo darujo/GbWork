@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Set;
 
 public class ClientHandler {
@@ -46,8 +47,9 @@ public class ClientHandler {
                     for (ReaderMessage listener : listeners) {
                         listener.processMessage(this, obj);
                     }
-
                 }
+            } catch (SocketException e) {
+                network.printErrorLog(NetError.READ_MESSAGE_SOCKET);
             } catch (IOException e) {
                 network.printErrorLog(NetError.DISCONNECT);
                 e.printStackTrace();
@@ -77,12 +79,14 @@ public class ClientHandler {
         }
     }
 
-    private void close() throws IOException {
-        System.out.println("Закрываем соединение. " + this);
-        Network.getNetwork().removeClientHandler(this);
-        connected = false;
-        inputStream.close();
-        outputStream.close();
+    public void close() throws IOException {
+        if (connected) {
+            System.out.println("Закрываем соединение. " + this);
+            Network.getNetwork().removeClientHandler(this);
+            inputStream.close();
+            outputStream.close();
+            connected = false;
+        }
     }
 
     private Command readCommand() throws IOException {

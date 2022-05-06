@@ -59,6 +59,7 @@ public class Network {
         ClientHandler clientHandler = new ClientHandler(socket, instance, messageListeners);
         clientHandler.handle(isServer);
         clientHandler.readSocket();
+        addClientHandler(clientHandler);
         return clientHandler;
     }
 
