@@ -4,6 +4,7 @@ public enum NetError {
 
     SEND_MESSAGE("Не удалось отправить сообщение!"),
     DISCONNECT("Соединение разорвано"),
+    READ_MESSAGE_SOCKET("Ошибка чтения данных, Socket был закрыт "),
     BAD_OBJECT("Получен не понятный объект"),
     SERVER_CONNECT("Не удалось установить соединение с сервером!");
 
