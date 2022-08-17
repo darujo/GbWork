@@ -12,13 +12,14 @@ import com.darujo.network.Network;
 import com.darujo.serverchat.server.auth.AuthCenter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ServerChat {
     Map<ClientHandler, ParamConnectClient> connectClients = new HashMap<>();
+
+    private final long TIMER_OUT_AUTH = 120; // seconds
+    private final long TIMER_EXECUTION_FREQUENCY = 5; // seconds
+    private Timer timer;
 
     public ServerChat() {
         Network network = Network.getNetwork();
@@ -34,6 +35,8 @@ public class ServerChat {
                     sendPublicMessage(clientHandler, (PublicMessageCommand) command.getData());
                 } else if (command.getType() == CommandType.REGISTRATION_USER) {
                     registrationAndSendAnswer(clientHandler, (RegistrationUser) command.getData());
+                }else if (command.getType() == CommandType.USER_CHANGE) {
+                    setNotAuth(clientHandler);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -42,9 +45,8 @@ public class ServerChat {
         network.addReaderEvent(event -> {
             try {
                 if (event.getEventType() == EventType.ADD_CLIENT_HANDLER) {
-
                     addClient((ClientHandler) event.getData());
-
+                    createTimer();
                 } else if (event.getEventType() == EventType.REMOVE_CLIENT_HANDLER) {
                     removeClient((ClientHandler) event.getData());
                 }
@@ -53,6 +55,55 @@ public class ServerChat {
             }
         });
         network.createSocketServer();
+    }
+
+    private void createTimer() {
+        if (timer == null) {
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+
+                    disconnectNotAuthUserTimeOut();
+                }
+
+            };
+            timer = new Timer(true);
+            timer.scheduleAtFixedRate(timerTask, 0, TIMER_EXECUTION_FREQUENCY * 1000);
+            System.out.println("Запущен процесс отключения по таймауту аунтификации.");
+        }
+    }
+
+    private synchronized void disconnectNotAuthUserTimeOut() {
+        boolean isAvailableNotAuthUser = true;
+        for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
+            ParamConnectClient paramConnectClient = connectClient.getValue();
+            if (!paramConnectClient.getAuthOk()) {
+                isAvailableNotAuthUser = false;
+                if (paramConnectClient.getConnectTime() + TIMER_OUT_AUTH * 1000 < System.currentTimeMillis()) {
+                    ClientHandler clientHandler = connectClient.getKey();
+                    try {
+                        clientHandler.sendCommand(Command.getErrorMessageCommand("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."));
+                        System.out.println("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."
+                                + " Время подключения " + new Date(paramConnectClient.getConnectTime())
+                                + " текущее время " + new Date(System.currentTimeMillis()));
+                        clientHandler.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        if (isAvailableNotAuthUser) {
+            stopTimer();
+
+        }
+    }
+
+    private void stopTimer() {
+        timer.cancel();
+        timer = null;
+        System.out.println("Остановлен процесс отключения пользователей");
+
     }
 
     private void registrationAndSendAnswer(ClientHandler clientHandler, RegistrationUser data) throws IOException {
@@ -72,27 +123,34 @@ public class ServerChat {
     private void authSendAnswer(ClientHandler clientHandler, String userName, AuthCenter.AuthMessage authMessage) throws IOException {
         if (authMessage == AuthCenter.AuthMessage.AUTH_OK) {
             if (isUserWork(userName, clientHandler)) {
+                setNotAuth(clientHandler);
                 clientHandler.sendCommand(
                         Command.getErrorMessageCommand("Пользователь уже работает на другом устройстве"));
             } else {
                 clientHandler.sendCommand(Command.getAuthOkCommand(userName));
-                Network.getNetwork().addClientHandler(clientHandler);
                 authClient(clientHandler, userName);
             }
-        } else if (authMessage == AuthCenter.AuthMessage.INVALID_LOGIN) {
-            Command command = Command.getAuthNoUserCommand(authMessage.getMessage());
-            clientHandler.sendCommand(command);
         } else {
-            CommandType commandType;
-            if (authMessage == AuthCenter.AuthMessage.LOGIN_IS_BUSY) {
-                commandType = CommandType.LOGIN_IS_BUSY;
-            } else if (authMessage == AuthCenter.AuthMessage.USER_NAME_IS_BUSY) {
-                commandType = CommandType.USER_NAME_IS_BUSY;
+            setNotAuth(clientHandler);
+            if (authMessage == AuthCenter.AuthMessage.INVALID_LOGIN) {
+                Command command = Command.getAuthNoUserCommand(authMessage.getMessage());
+                clientHandler.sendCommand(command);
             } else {
-                commandType = CommandType.ERROR_MESSAGE;
+                CommandType commandType;
+                if (authMessage == AuthCenter.AuthMessage.LOGIN_IS_BUSY) {
+                    commandType = CommandType.LOGIN_IS_BUSY;
+                } else if (authMessage == AuthCenter.AuthMessage.USER_NAME_IS_BUSY) {
+                    commandType = CommandType.USER_NAME_IS_BUSY;
+                } else {
+                    commandType = CommandType.ERROR_MESSAGE;
+                }
+                clientHandler.sendCommand(Command.getErrorMessageCommand(commandType, authMessage.getMessage()));
             }
-            clientHandler.sendCommand(Command.getErrorMessageCommand(commandType, authMessage.getMessage()));
         }
+    }
+
+    private synchronized void setNotAuth(ClientHandler clientHandler)  {
+        connectClients.get(clientHandler).setAuthBad();
     }
 
     private synchronized void addClient(ClientHandler clientHandler) throws IOException {
@@ -125,7 +183,7 @@ public class ServerChat {
         sendCommandAllAuthUser(Command.getUpdateUserListCommand(notifyUserListUpdated()), null);
     }
 
-    private boolean isUserWork(String senderName, ClientHandler clientHandler) {
+    private synchronized boolean isUserWork(String senderName, ClientHandler clientHandler) {
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
             if (connectClient.getKey() != clientHandler) {
                 String userName = connectClient.getValue().getUserName();
@@ -137,12 +195,12 @@ public class ServerChat {
         return false;
     }
 
-    private void sendPublicMessage(ClientHandler clientHandler, PublicMessageCommand messageCommand) throws IOException {
+    private synchronized void sendPublicMessage(ClientHandler clientHandler, PublicMessageCommand messageCommand) throws IOException {
         String user = connectClients.get(clientHandler).getUserName();
         sendCommandAllAuthUser(Command.getClientMessageCommand(user, messageCommand.getMessage(), false), clientHandler);
     }
 
-    private void sendPrivateMessage(ClientHandler clientHandler, PrivateMessageCommand messageCommand) throws IOException {
+    private synchronized void sendPrivateMessage(ClientHandler clientHandler, PrivateMessageCommand messageCommand) throws IOException {
         String user = connectClients.get(clientHandler).getUserName();
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
             if (connectClient.getValue().getUserName().equals(messageCommand.getReceiver())) {
@@ -151,10 +209,12 @@ public class ServerChat {
         }
     }
 
-    private List<String> notifyUserListUpdated() {
+    private synchronized List<String> notifyUserListUpdated() {
         List<String> users = new ArrayList<>();
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
-            users.add(connectClient.getValue().getUserName());
+            if(connectClient.getValue().getAuthOk()) {
+                users.add(connectClient.getValue().getUserName());
+            }
         }
         return users;
     }

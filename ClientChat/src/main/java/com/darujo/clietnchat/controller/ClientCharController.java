@@ -13,7 +13,12 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 
+import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -83,6 +88,9 @@ public class ClientCharController {
         textMessageAria.appendText(message);
         textMessageAria.appendText(System.lineSeparator());
         textMessageAria.appendText(System.lineSeparator());
+        textMessageAria.setStyle("-fx-text-fill: yellow;");
+        sendMessageText.setStyle("-fx-text-fill: yellow;");
+        textMessageAria.appendText("sss");
 
     }
 
