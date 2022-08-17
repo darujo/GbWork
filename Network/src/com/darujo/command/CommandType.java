@@ -13,5 +13,6 @@ public enum CommandType {
     ERROR_MESSAGE,
     REGISTRATION_USER,
     LOGIN_IS_BUSY,
-    USER_NAME_IS_BUSY
+    USER_NAME_IS_BUSY,
+    USER_CHANGE
 }

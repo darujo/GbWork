@@ -102,6 +102,11 @@ public class AuthController {
     }
 
     public void reShow() {
+        try {
+            clientHandler.sendCommand(Command.getChangeUserCommand());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Network.getNetwork().addReaderMessage(readerMessage);
         passwordField.setText("");
     }
@@ -181,5 +186,24 @@ public class AuthController {
             return userName.isEmpty() || userName.isBlank();
         }
         return true;
+    }
+
+    @FXML
+    public void nextField(ActionEvent actionEvent) {
+        final Object obj = actionEvent.getSource();
+        Platform.runLater(() -> {
+            if (obj == loginField && !isBadLoginField()) {
+                passwordField.requestFocus();
+            } else if (obj == passwordField && !isBadPasswordField()) {
+                if (userNameField.isVisible()) {
+                    userNameField.requestFocus();
+                } else {
+                    authButton.requestFocus();
+                }
+            } else if (obj == userNameField) {
+                registration.requestFocus();
+            }
+
+        });
     }
 }

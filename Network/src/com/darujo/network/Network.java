@@ -46,7 +46,7 @@ public class Network {
         try {
             socket = new Socket(SERVER_ADR, SERVER_PORT);
             System.out.println("Сооединение с " + SERVER_ADR + ":" + SERVER_PORT + " установлено.");
-            lastClientHandler = workSocket(false);
+            lastClientHandler = workSocket(true);
             return lastClientHandler;
         } catch (IOException e) {
             printErrorLog(NetError.SERVER_CONNECT, SERVER_ADR + ":" + SERVER_PORT);

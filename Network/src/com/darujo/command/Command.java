@@ -65,4 +65,9 @@ public class Command implements Serializable {
     public static Command getRegistrationUserCommand(String login, String password, String userName) {
         return new Command(CommandType.REGISTRATION_USER, new RegistrationUser(login, password, userName));
     }
+
+    public static Command getChangeUserCommand() {
+        return new Command(CommandType.USER_CHANGE, null);
+    }
+
 }

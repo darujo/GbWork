@@ -30,7 +30,6 @@ public class ClientChat extends Application {
         chatStage = stagePrimary;
         initChatDialog();
         initAuthDialog();
-        chatStage.show();
         authStage.show();
     }
 
@@ -38,7 +37,7 @@ public class ClientChat extends Application {
         chatWindow = new FXMLLoader();
         chatWindow.setLocation(ClientChat.class.getResource("clientchat-view.fxml"));
         Scene scene = new Scene(chatWindow.load());
-        chatStage.setTitle("Chat");
+        chatStage.setTitle("Чат DARu");
         chatStage.setScene(scene);
     }
 
@@ -51,10 +50,12 @@ public class ClientChat extends Application {
         authStage.initOwner(chatStage);
         authStage.initModality(Modality.WINDOW_MODAL);
         authStage.setScene(new Scene(authDialogPanel));
+        authStage.setTitle("Авторизация в чат DARu");
         authStage.setOnCloseRequest(windowEvent -> chatStage.close());
     }
 
-    public void authShow() {
+    public void authShow()  {
+        chatStage.close();
         authStage.show();
         getAuthController().reShow();
     }
@@ -68,6 +69,7 @@ public class ClientChat extends Application {
         getChatStage().setTitle(userName);
         getAuthController().close();
         getAuthStage().close();
+        chatStage.show();
     }
 
     @Override

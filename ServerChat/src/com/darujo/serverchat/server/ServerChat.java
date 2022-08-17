@@ -35,6 +35,8 @@ public class ServerChat {
                     sendPublicMessage(clientHandler, (PublicMessageCommand) command.getData());
                 } else if (command.getType() == CommandType.REGISTRATION_USER) {
                     registrationAndSendAnswer(clientHandler, (RegistrationUser) command.getData());
+                }else if (command.getType() == CommandType.USER_CHANGE) {
+                    setNotAuth(clientHandler);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
