@@ -54,7 +54,14 @@ public class ServerChat {
                 e.printStackTrace();
             }
         });
-        network.createSocketServer();
+        try {
+
+            network.createSocketServer();
+        }
+        finally {
+            AuthCenter.getInstance().close();
+        }
+
     }
 
     private void createTimer() {
