@@ -2,14 +2,13 @@ package com.darujo.serverchat.server;
 
 import com.darujo.command.Command;
 import com.darujo.command.CommandType;
-import com.darujo.command.commands.AuthCommandData;
-import com.darujo.command.commands.PrivateMessageCommand;
-import com.darujo.command.commands.PublicMessageCommand;
-import com.darujo.command.commands.RegistrationUser;
+import com.darujo.command.commands.*;
+import com.darujo.command.object.UserPublic;
 import com.darujo.event.EventType;
 import com.darujo.network.ClientHandler;
 import com.darujo.network.Network;
 import com.darujo.serverchat.server.auth.AuthCenter;
+import com.darujo.serverchat.server.auth.User;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,6 +36,8 @@ public class ServerChat {
                     registrationAndSendAnswer(clientHandler, (RegistrationUser) command.getData());
                 }else if (command.getType() == CommandType.USER_CHANGE) {
                     setNotAuth(clientHandler);
+                } else if (command.getType() == CommandType.USER_DATA_CHANGE) {
+                    changeUserData(clientHandler,(ChangeUserData) command.getData());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -62,6 +63,14 @@ public class ServerChat {
             AuthCenter.getInstance().close();
         }
 
+    }
+
+    private void changeUserData(ClientHandler clientHandler, ChangeUserData data) throws IOException {
+        ParamConnectClient paramConnectClient = connectClients.get(clientHandler);
+        AuthCenter authCenter = AuthCenter.getInstance();
+        AuthCenter.AuthMessage authMessage = authCenter.changeUserData(paramConnectClient.getUser().getId(),data.getLogin(),data.getPasswordOld(), data.getPassword(),data.getUserName());
+        User user = authCenter.getUser(paramConnectClient.getUser().getId());
+        authSendAnswer(clientHandler, user, authMessage,false);
     }
 
     private void createTimer() {
@@ -116,31 +125,40 @@ public class ServerChat {
     private void registrationAndSendAnswer(ClientHandler clientHandler, RegistrationUser data) throws IOException {
         AuthCenter authCenter = AuthCenter.getInstance();
         AuthCenter.AuthMessage authMessage = authCenter.registrationUser(data.getLogin(), data.getPassword(), data.getUserName());
-        String userName = authCenter.getUserName(data.getLogin());
-        authSendAnswer(clientHandler, userName, authMessage);
+        User user = authCenter.getUser(data.getLogin());
+        authSendAnswer(clientHandler, user, authMessage);
     }
 
     private void authAndSendAnswer(ClientHandler clientHandler, AuthCommandData data) throws IOException {
         AuthCenter authCenter = AuthCenter.getInstance();
         AuthCenter.AuthMessage authMessage = authCenter.availableUser(data.getLogin(), data.getPassword());
-        String userName = authCenter.getUserName(data.getLogin());
-        authSendAnswer(clientHandler, userName, authMessage);
+        User user = authCenter.getUser(data.getLogin());
+        authSendAnswer(clientHandler, user, authMessage);
     }
 
-    private void authSendAnswer(ClientHandler clientHandler, String userName, AuthCenter.AuthMessage authMessage) throws IOException {
+    private void authSendAnswer(ClientHandler clientHandler, User user, AuthCenter.AuthMessage authMessage) throws IOException {
+        authSendAnswer( clientHandler,  user, authMessage,true);
+    }
+    private void authSendAnswer(ClientHandler clientHandler, User user, AuthCenter.AuthMessage authMessage,boolean authCommand) throws IOException {
         if (authMessage == AuthCenter.AuthMessage.AUTH_OK) {
-            if (isUserWork(userName, clientHandler)) {
+            if (isUserWork(user, clientHandler)) {
                 setNotAuth(clientHandler);
                 clientHandler.sendCommand(
                         Command.getErrorMessageCommand("Пользователь уже работает на другом устройстве"));
             } else {
-                clientHandler.sendCommand(Command.getAuthOkCommand(userName));
-                authClient(clientHandler, userName);
+                clientHandler.sendCommand(Command.getAuthOkCommand(user.getUserPublic()));
+                authClient(clientHandler, user);
             }
+        } else if(authMessage == AuthCenter.AuthMessage.USER_DATA_CHANGE_OK) {
+            clientHandler.sendCommand(Command.getChangeUserDataOkCommand(user.getUserPublic()));
+            notifyUserListUpdatedAllUser();
         } else {
-            setNotAuth(clientHandler);
+            if(authCommand) {
+                setNotAuth(clientHandler);
+            }
             if (authMessage == AuthCenter.AuthMessage.INVALID_LOGIN) {
                 Command command = Command.getAuthNoUserCommand(authMessage.getMessage());
+                connectClients.get(clientHandler).setUser(user);
                 clientHandler.sendCommand(command);
             } else {
                 CommandType commandType;
@@ -165,7 +183,7 @@ public class ServerChat {
         notifyUserListUpdatedAllUser();
     }
 
-    private synchronized void authClient(ClientHandler clientHandler, String userName) throws IOException {
+    private synchronized void authClient(ClientHandler clientHandler, User user) throws IOException {
 
         ParamConnectClient connectClient = connectClients.get(clientHandler);
         if (connectClient == null) {
@@ -173,7 +191,7 @@ public class ServerChat {
             connectClients.put(clientHandler, connectClient);
         }
         connectClient.setAuthOk(true);
-        connectClient.setUserName(userName);
+        connectClient.setUser(user);
         notifyUserListUpdatedAllUser();
     }
 
@@ -190,11 +208,11 @@ public class ServerChat {
         sendCommandAllAuthUser(Command.getUpdateUserListCommand(notifyUserListUpdated()), null);
     }
 
-    private synchronized boolean isUserWork(String senderName, ClientHandler clientHandler) {
+    private synchronized boolean isUserWork(User senderUser, ClientHandler clientHandler) {
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
             if (connectClient.getKey() != clientHandler) {
-                String userName = connectClient.getValue().getUserName();
-                if (userName != null && userName.equals(senderName)) {
+                User user = connectClient.getValue().getUser();
+                if (user != null && user.equals(senderUser)) {
                     return true;
                 }
             }
@@ -203,24 +221,24 @@ public class ServerChat {
     }
 
     private synchronized void sendPublicMessage(ClientHandler clientHandler, PublicMessageCommand messageCommand) throws IOException {
-        String user = connectClients.get(clientHandler).getUserName();
-        sendCommandAllAuthUser(Command.getClientMessageCommand(user, messageCommand.getMessage(), false), clientHandler);
+        User user = connectClients.get(clientHandler).getUser();
+        sendCommandAllAuthUser(Command.getClientMessageCommand(user.getUserPublic(), messageCommand.getMessage(), false), clientHandler);
     }
 
     private synchronized void sendPrivateMessage(ClientHandler clientHandler, PrivateMessageCommand messageCommand) throws IOException {
-        String user = connectClients.get(clientHandler).getUserName();
+        User user = connectClients.get(clientHandler).getUser();
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
-            if (connectClient.getValue().getUserName().equals(messageCommand.getReceiver())) {
-                connectClient.getKey().sendCommand(Command.getClientMessageCommand(user, messageCommand.getMessage(), true));
+            if (connectClient.getValue().getUser().equals(messageCommand.getReceiver())) {
+                connectClient.getKey().sendCommand(Command.getClientMessageCommand(user.getUserPublic(), messageCommand.getMessage(), true));
             }
         }
     }
 
-    private synchronized List<String> notifyUserListUpdated() {
-        List<String> users = new ArrayList<>();
+    private synchronized List<UserPublic> notifyUserListUpdated() {
+        List<UserPublic> users = new ArrayList<>();
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
             if(connectClient.getValue().getAuthOk()) {
-                users.add(connectClient.getValue().getUserName());
+                users.add(connectClient.getValue().getUser().getUserPublic());
             }
         }
         return users;

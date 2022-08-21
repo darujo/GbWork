@@ -4,10 +4,10 @@ import com.darujo.command.object.UserPublic;
 
 import java.io.Serializable;
 
-public class AuthOkCommandData implements Serializable {
+public class ChangeUserDataOkCommandData implements Serializable {
     private final UserPublic userPublic;
 
-    public AuthOkCommandData(UserPublic userPublic) {
+    public ChangeUserDataOkCommandData(UserPublic userPublic) {
         this.userPublic = userPublic;
     }
 

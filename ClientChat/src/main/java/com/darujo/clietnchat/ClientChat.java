@@ -1,6 +1,7 @@
 package com.darujo.clietnchat;
 
 import com.darujo.clietnchat.controller.AuthController;
+import com.darujo.clietnchat.controller.ChangeNikController;
 import com.darujo.clietnchat.controller.ClientCharController;
 import com.darujo.clietnchat.dialogs.Dialogs;
 import com.darujo.network.NetError;
@@ -20,8 +21,11 @@ public class ClientChat extends Application {
     private Stage chatStage;
     private Stage authStage;
 
+    private Stage changeNikStage;
+
     private FXMLLoader chatWindow;
     private FXMLLoader authWindow;
+    private FXMLLoader changeNikWindow;
 
     private static ClientChat INSTANCE;
 
@@ -54,6 +58,28 @@ public class ClientChat extends Application {
         authStage.setOnCloseRequest(windowEvent -> chatStage.close());
     }
 
+    private void initChangeNikDialog() throws IOException {
+        changeNikWindow = new FXMLLoader();
+        changeNikWindow.setLocation(ClientChat.class.getResource("change-nik-view.fxml"));
+        AnchorPane changeNikDialogPanel = changeNikWindow.load();
+
+        changeNikStage = new Stage();
+        changeNikStage.initOwner(chatStage);
+        changeNikStage.initModality(Modality.WINDOW_MODAL);
+        changeNikStage.setScene(new Scene(changeNikDialogPanel));
+        changeNikStage.setTitle("Смена ника или логина");
+//        changeNikStage.setOnCloseRequest(windowEvent -> chatStage.close());
+    }
+
+    public void changeNikShow() throws IOException {
+        if (changeNikStage == null){
+            initChangeNikDialog();
+        }
+//        chatStage.close();
+        changeNikStage.show();
+        getChangeNikController().reShow();
+    }
+
     public void authShow()  {
         chatStage.close();
         authStage.show();
@@ -68,7 +94,18 @@ public class ClientChat extends Application {
         getChatController().initializeMessageReader();
         getChatStage().setTitle(userName);
         getAuthController().close();
+        ChangeNikController changeNikController = getChangeNikController();
+        if(changeNikController!= null){
+            changeNikController.close();
+        }
         getAuthStage().close();
+        chatStage.show();
+    }
+    public void closeWindowsChangeNik(String userName) {
+        getChatStage().setTitle(userName);
+        getAuthController().close();
+        getChangeNikController().close();
+        getChangeNikStage().close();
         chatStage.show();
     }
 
@@ -81,8 +118,17 @@ public class ClientChat extends Application {
         return chatStage;
     }
 
+    public Stage getChangeNikStage() {
+        return changeNikStage;
+    }
+
     public AuthController getAuthController() {
         return authWindow.getController();
+    }
+
+    public ChangeNikController getChangeNikController() {
+
+        return changeNikWindow == null ? null : changeNikWindow.getController();
     }
 
     public ClientCharController getChatController() {

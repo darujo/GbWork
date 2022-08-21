@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="161.0" prefWidth="317.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.darujo.clietnchat.controller.ChangeNikController">
+    <children>
+        <Label alignment="CENTER_RIGHT" layoutX="21.0" layoutY="25.0" prefHeight="17.0" prefWidth="55.0" text="Логин:" textAlignment="RIGHT" AnchorPane.bottomAnchor="161.0" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="24.0" />
+        <TextField fx:id="loginField" disable="true" layoutX="87.0" layoutY="21.0" onAction="#nextField" onKeyReleased="#checkLogin" AnchorPane.topAnchor="20.0" />
+        <Button fx:id="changeButton" layoutX="76.0" layoutY="101.0" mnemonicParsing="false" onAction="#executeChange" prefHeight="25.0" prefWidth="71.0" text="Изменить" />
+      <Button fx:id="cancelButton" layoutX="149.0" layoutY="101.0" mnemonicParsing="false" onAction="#executeCancel" prefHeight="25.0" prefWidth="71.0" text="Отмена" />
+      <Label fx:id="userNameLabel" alignment="CENTER_RIGHT" layoutX="21.0" layoutY="64.0" text="Ник:" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="64.0" />
+      <TextField fx:id="userNameField" disable="true" layoutX="87.0" layoutY="60.0" onAction="#nextField" onKeyReleased="#checkUserName" AnchorPane.topAnchor="60.0" />
+      <Label fx:id="badLoginLabel" layoutX="236.0" layoutY="19.0" text="!" textFill="RED" visible="false">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="badUserNameLabel" layoutX="236.0" layoutY="59.0" text="!" textFill="RED" visible="false">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <CheckBox fx:id="changeLogin" layoutX="12.0" layoutY="24.0" mnemonicParsing="false" onAction="#changeLoginActive" />
+      <CheckBox fx:id="changeNike" layoutX="11.0" layoutY="64.0" mnemonicParsing="false" onAction="#changeNikActive" />
+    </children>
+</AnchorPane>
