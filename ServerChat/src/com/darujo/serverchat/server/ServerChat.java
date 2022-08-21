@@ -151,6 +151,7 @@ public class ServerChat {
             }
         } else if(authMessage == AuthCenter.AuthMessage.USER_DATA_CHANGE_OK) {
             clientHandler.sendCommand(Command.getChangeUserDataOkCommand(user.getUserPublic()));
+            connectClients.get(clientHandler).setUser(user);
             notifyUserListUpdatedAllUser();
         } else {
             if(authCommand) {
