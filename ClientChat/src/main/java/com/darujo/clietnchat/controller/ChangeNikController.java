@@ -3,7 +3,6 @@ package com.darujo.clietnchat.controller;
 import com.darujo.clietnchat.ClientChat;
 import com.darujo.clietnchat.dialogs.Dialogs;
 import com.darujo.command.Command;
-import com.darujo.command.commands.AuthOkCommandData;
 import com.darujo.command.commands.ChangeUserDataOkCommandData;
 import com.darujo.command.commands.ErrorCommandData;
 import com.darujo.network.ClientHandler;
@@ -163,7 +162,6 @@ public class ChangeNikController {
             }
             clientHandler.sendCommand(Command.getChangeUserNikAndLoginCommand((loginField.isDisable() ? null : loginField.getText()),
                     (userNameField.isDisable() ? null : userNameField.getText())));
-//        clientHandler.sendCommand(Command.getRegistrationUserCommand(loginField.getText(), passwordField.getText(), userNameField.getText()));
         }
     }
 

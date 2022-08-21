@@ -45,6 +45,7 @@ public class ClientCharController {
     public MenuItem closeMenuButton;
     @FXML
     public MenuItem changeNikButton;
+    public MenuItem changePasswordButton;
 
     private ClientHandler clientHandler;
 
@@ -137,6 +138,15 @@ public class ClientCharController {
         Platform.runLater(() -> {
             try {
                 ClientChat.getInstance().changeNikShow();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    public void changePassword(ActionEvent actionEvent) {
+        Platform.runLater(() -> {
+            try {
+                ClientChat.getInstance().changePasswordShow();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

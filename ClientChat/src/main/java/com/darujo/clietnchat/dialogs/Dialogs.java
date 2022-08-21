@@ -7,6 +7,9 @@ public class Dialogs {
 
     public enum AuthError {
         EMPTY_CREDENTIALS("Логин и пароль должны быть указаны"),
+        EMPTY_PASSWORD("Пароли должны быть указаны"),
+        EMPTY_PASSWORD_TWO("Повторый пароЫль должен совпадать с новым"),
+
         INVALID_CREDENTIALS("Логин и пароль заданы некорректно");
 
         private static final String TITLE = "Ошибка аутентификации";

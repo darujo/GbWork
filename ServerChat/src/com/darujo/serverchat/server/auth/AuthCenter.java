@@ -183,7 +183,7 @@ public class AuthCenter {
         if (user == null){
             return AuthMessage.AUTH_SQL_ERROR;
         } else if (passwordNew != null ){
-            if (user.getPassword().equals(passwordOld)) {
+            if (!user.getPassword().equals(passwordOld)) {
                 return AuthMessage.INVALID_PASSWORD;
             }
         }
@@ -197,7 +197,11 @@ public class AuthCenter {
             if (userLogin != null) return AuthMessage.LOGIN_IS_BUSY;
         }else
             loginNew =null;
-            
+        if (user.getPassword().equals(passwordNew)) {
+            passwordNew =null;
+        }
+
+
         return setUserData(id,loginNew,userNameNew,passwordNew);
     }
 
