@@ -1,7 +1,9 @@
 package com.darujo.serverchat.server;
 
+import com.darujo.serverchat.server.auth.User;
+
 public class ParamConnectClient {
-    private String userName;
+    private User user;
     private Boolean authOk = false;
     private long connectTime = System.currentTimeMillis();
 
@@ -16,12 +18,12 @@ public class ParamConnectClient {
         authOk = false;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public String getUserName() {
-        return userName;
+    public User getUser() {
+        return user;
     }
 
     public Boolean getAuthOk() {

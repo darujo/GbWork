@@ -44,7 +44,7 @@ public class AuthController {
         switch (command.getType()) {
             case AUTH_OK: {
 
-                String userName = ((AuthOkCommandData) command.getData()).userName;
+                String userName = ((AuthOkCommandData) command.getData()).getUserPublic().getUserName();
                 Platform.runLater(() ->
                         ClientChat.getInstance().openChatWindow(userName)
                 );

@@ -1,6 +1,7 @@
 package com.darujo.command;
 
 import com.darujo.command.commands.*;
+import com.darujo.command.object.UserPublic;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,8 +27,8 @@ public class Command implements Serializable {
         return new Command(CommandType.AUTH, new AuthCommandData(login, password));
     }
 
-    public static Command getAuthOkCommand(String userName) {
-        return new Command(CommandType.AUTH_OK, new AuthOkCommandData(userName));
+    public static Command getAuthOkCommand(UserPublic userPublic) {
+        return new Command(CommandType.AUTH_OK, new AuthOkCommandData(userPublic));
     }
 
     public static Command getErrorMessageCommand(String text) {
@@ -42,7 +43,7 @@ public class Command implements Serializable {
         return getErrorMessageCommand(CommandType.AUTH_NO_USER, text);
     }
 
-    public static Command getUpdateUserListCommand(List<String> users) {
+    public static Command getUpdateUserListCommand(List<UserPublic> users) {
         return new Command(CommandType.UPDATE_USERS_LIST, new UpdateUserListCommandData(users));
     }
 
@@ -50,11 +51,11 @@ public class Command implements Serializable {
         return new Command(CommandType.GET_USER_LIST, null);
     }
 
-    public static Command getClientMessageCommand(String sender, String message, boolean privateMessage) {
+    public static Command getClientMessageCommand(UserPublic sender, String message, boolean privateMessage) {
         return new Command(CommandType.CLIENT_MESSAGE, new ClientMessageCommand(sender, message, privateMessage));
     }
 
-    public static Command getPrivateMessageCommand(String receiver, String message) {
+    public static Command getPrivateMessageCommand(UserPublic receiver, String message) {
         return new Command(CommandType.PRIVATE_MESSAGE, new PrivateMessageCommand(receiver, message));
     }
 
@@ -68,6 +69,20 @@ public class Command implements Serializable {
 
     public static Command getChangeUserCommand() {
         return new Command(CommandType.USER_CHANGE, null);
+    }
+    public static Command getChangeUserDataCommand(String login, String passwordOld ,String password, String userName) {
+        return new Command(CommandType.USER_DATA_CHANGE,new ChangeUserData(login,passwordOld,password,userName));
+    }
+
+    public static Command getChangeUserPasswordCommand(String passwordOld ,String password) {
+        return getChangeUserDataCommand(null, passwordOld, password, null);
+    }
+    public static Command getChangeUserNikAndLoginCommand(String login,  String userName) {
+        return getChangeUserDataCommand(login, null, null, userName);
+    }
+
+    public static Command getChangeUserDataOkCommand(UserPublic userPublic) {
+        return new Command(CommandType.USER_DATA_CHANGE_OK, new ChangeUserDataOkCommandData(userPublic));
     }
 
 }

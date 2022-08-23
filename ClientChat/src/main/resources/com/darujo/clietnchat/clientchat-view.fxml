@@ -35,6 +35,12 @@
                     <menus>
                       <Menu mnemonicParsing="false" text="Меню">
                         <items>
+                              <Menu mnemonicParsing="false" text="Изменить данные">
+                                <items>
+                                  <MenuItem fx:id="changeNikButton" mnemonicParsing="false" onAction="#changeNik" text="Сменить ник или логин " />
+                                    <MenuItem fx:id="changePasswordButton" mnemonicParsing="false" onAction="#changePassword" text="Сменить пароль" />
+                                </items>
+                              </Menu>
                           <MenuItem fx:id="changeUserButton" mnemonicParsing="false" onAction="#changeUser" text="Сменить пользователя" />
                           <MenuItem fx:id="closeMenuButton" mnemonicParsing="false" onAction="#actionClose" text="Выход" />
                         </items>

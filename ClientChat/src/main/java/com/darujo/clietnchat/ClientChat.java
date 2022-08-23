@@ -1,6 +1,8 @@
 package com.darujo.clietnchat;
 
 import com.darujo.clietnchat.controller.AuthController;
+import com.darujo.clietnchat.controller.ChangeNikController;
+import com.darujo.clietnchat.controller.ChangePasswordController;
 import com.darujo.clietnchat.controller.ClientCharController;
 import com.darujo.clietnchat.dialogs.Dialogs;
 import com.darujo.network.NetError;
@@ -19,10 +21,12 @@ public class ClientChat extends Application {
 
     private Stage chatStage;
     private Stage authStage;
-
+    private Stage changeNikStage;
+    private Stage changePasswordStage;
     private FXMLLoader chatWindow;
     private FXMLLoader authWindow;
-
+    private FXMLLoader changeNikWindow;
+    private FXMLLoader changePasswordWindow;
     private static ClientChat INSTANCE;
 
     @Override
@@ -54,6 +58,45 @@ public class ClientChat extends Application {
         authStage.setOnCloseRequest(windowEvent -> chatStage.close());
     }
 
+    private void initChangeNikDialog() throws IOException {
+        changeNikWindow = new FXMLLoader();
+        changeNikWindow.setLocation(ClientChat.class.getResource("change-nik-view.fxml"));
+        AnchorPane changeNikDialogPanel = changeNikWindow.load();
+
+        changeNikStage = new Stage();
+        changeNikStage.initOwner(chatStage);
+        changeNikStage.initModality(Modality.WINDOW_MODAL);
+        changeNikStage.setScene(new Scene(changeNikDialogPanel));
+        changeNikStage.setTitle("Смена ника или логина");
+    }
+
+    private void initChangePasswordDialog() throws IOException {
+        changePasswordWindow = new FXMLLoader();
+        changePasswordWindow.setLocation(ClientChat.class.getResource("change-password-view.fxml"));
+        AnchorPane changeNikDialogPanel = changePasswordWindow.load();
+
+        changePasswordStage = new Stage();
+        changePasswordStage.initOwner(chatStage);
+        changePasswordStage.initModality(Modality.WINDOW_MODAL);
+        changePasswordStage.setScene(new Scene(changeNikDialogPanel));
+        changePasswordStage.setTitle("Смена пароля");
+    }
+
+    public void changeNikShow() throws IOException {
+        if (changeNikStage == null){
+            initChangeNikDialog();
+        }
+        changeNikStage.show();
+        getChangeNikController().reShow();
+    }
+
+    public void changePasswordShow() throws IOException {
+        if (changePasswordStage == null){
+            initChangePasswordDialog();
+        }
+        changePasswordStage.show();
+        getChangePasswordController().reShow();
+    }
     public void authShow()  {
         chatStage.close();
         authStage.show();
@@ -71,7 +114,18 @@ public class ClientChat extends Application {
         getAuthStage().close();
         chatStage.show();
     }
+    public void closeWindowsChangeNik(String userName) {
+        getChatStage().setTitle(userName);
+        getChangeNikController().close();
+        getChangeNikStage().close();
+        chatStage.show();
+    }
 
+    public void closeWindowsChangePassword() {
+        getChangePasswordController().close();
+        getChangePasswordStage().close();
+        chatStage.show();
+    }
     @Override
     public void init() {
         INSTANCE = this;
@@ -81,10 +135,25 @@ public class ClientChat extends Application {
         return chatStage;
     }
 
+    public Stage getChangeNikStage() {
+        return changeNikStage;
+    }
+    public Stage getChangePasswordStage() {
+        return changePasswordStage;
+    }
     public AuthController getAuthController() {
         return authWindow.getController();
     }
 
+    public ChangeNikController getChangeNikController() {
+
+        return changeNikWindow == null ? null : changeNikWindow.getController();
+    }
+
+    public ChangePasswordController getChangePasswordController() {
+
+        return changePasswordWindow == null ? null : changePasswordWindow.getController();
+    }
     public ClientCharController getChatController() {
         return chatWindow.getController();
     }

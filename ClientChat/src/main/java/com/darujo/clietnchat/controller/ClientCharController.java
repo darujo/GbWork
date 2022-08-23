@@ -5,6 +5,7 @@ import com.darujo.command.Command;
 import com.darujo.command.CommandType;
 import com.darujo.command.commands.ClientMessageCommand;
 import com.darujo.command.commands.UpdateUserListCommandData;
+import com.darujo.command.object.UserPublic;
 import com.darujo.network.ClientHandler;
 import com.darujo.network.Network;
 import com.darujo.network.ReaderMessage;
@@ -18,7 +19,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,13 +36,16 @@ public class ClientCharController {
     public Button sendMessageButton;
 
     @FXML
-    public ListView<String> userList;
+    public ListView<UserPublic> userList;
     @FXML
     public Button SendAll;
     @FXML
     public MenuItem changeUserButton;
     @FXML
     public MenuItem closeMenuButton;
+    @FXML
+    public MenuItem changeNikButton;
+    public MenuItem changePasswordButton;
 
     private ClientHandler clientHandler;
 
@@ -50,11 +53,11 @@ public class ClientCharController {
     public void appendMessageToChar(ActionEvent actionEvent) {
         if (!sendMessageText.getText().isEmpty()) {
             if (!userList.getSelectionModel().isEmpty()) {
-                List<String> selected = userList.getSelectionModel().getSelectedItems();
-                for (String item : selected) {
+                List<UserPublic> selected = userList.getSelectionModel().getSelectedItems();
+                for (UserPublic item : selected) {
                     try {
                         clientHandler.sendCommand(Command.getPrivateMessageCommand(item, sendMessageText.getText()));
-                        printMessage("Я -> " + item, sendMessageText.getText());
+                        printMessage("Я -> " + item.getUserName(), sendMessageText.getText());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -87,11 +90,6 @@ public class ClientCharController {
         textMessageAria.appendText(sender + ": ");
         textMessageAria.appendText(message);
         textMessageAria.appendText(System.lineSeparator());
-        textMessageAria.appendText(System.lineSeparator());
-        textMessageAria.setStyle("-fx-text-fill: yellow;");
-        sendMessageText.setStyle("-fx-text-fill: yellow;");
-        textMessageAria.appendText("sss");
-
     }
 
     private void requestFocus() {
@@ -108,7 +106,7 @@ public class ClientCharController {
             } else if (command.getType() == CommandType.CLIENT_MESSAGE) {
                 ClientMessageCommand clientMessageCommand = (ClientMessageCommand) command.getData();
                 Platform.runLater(() -> {
-                    String receiver = clientMessageCommand.isPrivateMessage() ? clientMessageCommand.getSender() + " -> мне" : clientMessageCommand.getSender();
+                    String receiver = clientMessageCommand.isPrivateMessage() ? clientMessageCommand.getSender().getUserName() + " -> мне" : clientMessageCommand.getSender().getUserName();
                     printMessage(receiver, clientMessageCommand.getMessage());
                 });
 
@@ -134,5 +132,24 @@ public class ClientCharController {
 
     public void actionClose(ActionEvent actionEvent) {
         ClientChat.getInstance().getChatStage().close();
+    }
+
+    public void changeNik(ActionEvent actionEvent) {
+        Platform.runLater(() -> {
+            try {
+                ClientChat.getInstance().changeNikShow();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    public void changePassword(ActionEvent actionEvent) {
+        Platform.runLater(() -> {
+            try {
+                ClientChat.getInstance().changePasswordShow();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }
