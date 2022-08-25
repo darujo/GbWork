@@ -5,6 +5,7 @@ import com.darujo.clietnchat.dialogs.Dialogs;
 import com.darujo.command.Command;
 import com.darujo.command.commands.AuthOkCommandData;
 import com.darujo.command.commands.ErrorCommandData;
+import com.darujo.command.object.UserPublic;
 import com.darujo.event.EventType;
 import com.darujo.network.ClientHandler;
 import com.darujo.network.Network;
@@ -44,9 +45,9 @@ public class AuthController {
         switch (command.getType()) {
             case AUTH_OK: {
 
-                String userName = ((AuthOkCommandData) command.getData()).getUserPublic().getUserName();
+                UserPublic user = ((AuthOkCommandData) command.getData()).getUserPublic();
                 Platform.runLater(() ->
-                        ClientChat.getInstance().openChatWindow(userName)
+                        ClientChat.getInstance().openChatWindow(user)
                 );
                 break;
 

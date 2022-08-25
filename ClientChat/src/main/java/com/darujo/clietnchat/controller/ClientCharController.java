@@ -19,13 +19,19 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ClientCharController {
+    private static final int READ_MESSAGE = 100;
     @FXML
     public TextArea textMessageAria;
 
@@ -48,6 +54,7 @@ public class ClientCharController {
     public MenuItem changePasswordButton;
 
     private ClientHandler clientHandler;
+    private int id;
 
     @FXML
     public void appendMessageToChar(ActionEvent actionEvent) {
@@ -90,8 +97,30 @@ public class ClientCharController {
         textMessageAria.appendText(sender + ": ");
         textMessageAria.appendText(message);
         textMessageAria.appendText(System.lineSeparator());
+        try (BufferedWriter writer = new BufferedWriter(new  FileWriter("hist_user"+id +".txt",true))) {
+            writer.write(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now()));
+            writer.write(System.lineSeparator());
+            writer.write(sender + ": ");
+            writer.write(message);
+            writer.write(System.lineSeparator());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    public  void readHist (int id ){
+        this.id = id;
+        try (Stream<String> stream = Files.lines(Paths.get("hist_user"+id +".txt"))) {
+            Object [] str = stream.toArray();
+            textMessageAria.clear();
+            for (int i = Math.min(2 * READ_MESSAGE,str.length); i > 0  ; i--) {
+                textMessageAria.appendText(str[str.length - i].toString());
+                textMessageAria.appendText(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            System.out.println("Не найден файл истории");
+        }
+    }
     private void requestFocus() {
         Platform.runLater(() -> sendMessageText.requestFocus());
     }
