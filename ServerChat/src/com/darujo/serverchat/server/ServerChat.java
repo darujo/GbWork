@@ -61,6 +61,7 @@ public class ServerChat {
         }
         finally {
             AuthCenter.getInstance().close();
+            network.close();
         }
 
     }
@@ -229,7 +230,7 @@ public class ServerChat {
     private synchronized void sendPrivateMessage(ClientHandler clientHandler, PrivateMessageCommand messageCommand) throws IOException {
         User user = connectClients.get(clientHandler).getUser();
         for (Map.Entry<ClientHandler, ParamConnectClient> connectClient : connectClients.entrySet()) {
-            if (connectClient.getValue().getUser().equals(messageCommand.getReceiver())) {
+            if (connectClient.getValue().getUser().getUserPublic().equals(messageCommand.getReceiver())) {
                 connectClient.getKey().sendCommand(Command.getClientMessageCommand(user.getUserPublic(), messageCommand.getMessage(), true));
             }
         }

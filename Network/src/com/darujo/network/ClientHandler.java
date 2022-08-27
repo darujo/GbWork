@@ -40,30 +40,29 @@ public class ClientHandler {
     }
 
     public void readSocket() {
-        Thread thread = new Thread(() -> {
+        Network.getNetwork().executorService.execute(() -> {
             try {
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
                     Command obj = readCommand();
                     for (ReaderMessage listener : listeners) {
                         listener.processMessage(this, obj);
                     }
                 }
             } catch (SocketException e) {
-                network.printErrorLog(NetError.READ_MESSAGE_SOCKET);
+                if(!Thread.currentThread().isInterrupted()){
+                    network.printErrorLog(NetError.READ_MESSAGE_SOCKET);
+                }
             } catch (IOException e) {
                 network.printErrorLog(NetError.DISCONNECT);
-                e.printStackTrace();
             } finally {
                 try {
-                    close();
+                    close(!Thread.currentThread().isInterrupted());
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     public synchronized void sendCommand(Command command) throws IOException {
@@ -80,9 +79,15 @@ public class ClientHandler {
     }
 
     public void close() throws IOException {
+        close(false);
+    }
+
+    public void close(boolean reLoad) throws IOException {
         if (connected) {
             System.out.println("Закрываем соединение. " + this);
-            Network.getNetwork().removeClientHandler(this);
+            if (reLoad) {
+                Network.getNetwork().removeClientHandler(this);
+            }
             inputStream.close();
             outputStream.close();
             connected = false;
@@ -94,7 +99,7 @@ public class ClientHandler {
             return (Command) inputStream.readObject();
         } catch (ClassNotFoundException e) {
             network.printErrorLog(NetError.BAD_OBJECT);
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return null;
     }

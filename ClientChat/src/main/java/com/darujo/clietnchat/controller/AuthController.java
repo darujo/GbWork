@@ -103,7 +103,9 @@ public class AuthController {
 
     public void reShow() {
         try {
-            clientHandler.sendCommand(Command.getChangeUserCommand());
+            if(clientHandler != null){
+                clientHandler.sendCommand(Command.getChangeUserCommand());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
