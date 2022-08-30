@@ -5,6 +5,7 @@ import com.darujo.clietnchat.controller.ChangeNikController;
 import com.darujo.clietnchat.controller.ChangePasswordController;
 import com.darujo.clietnchat.controller.ClientCharController;
 import com.darujo.clietnchat.dialogs.Dialogs;
+import com.darujo.command.object.UserPublic;
 import com.darujo.network.NetError;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -107,9 +108,10 @@ public class ClientChat extends Application {
         launch();
     }
 
-    public void openChatWindow(String userName) {
+    public void openChatWindow(UserPublic user) {
         getChatController().initializeMessageReader();
-        getChatStage().setTitle(userName);
+        getChatController().readHist(user.getId());
+        getChatStage().setTitle(user.getUserName());
         getAuthController().close();
         getAuthStage().close();
         chatStage.show();
