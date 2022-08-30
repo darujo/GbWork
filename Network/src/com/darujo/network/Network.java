@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Network {
 
@@ -24,8 +26,21 @@ public class Network {
 
     private static Network instance;
 
+    public final ExecutorService executorService;
     private Network() {
         instance = this;
+        executorService = Executors.newCachedThreadPool();
+    }
+
+    public void close() {
+        executorService.shutdownNow();
+        for (ClientHandler clientHandler : clientHandlers){
+            try {
+                clientHandler.close();
+            } catch (IOException e) {
+                printErrorLog(NetError.DISCONNECT,e.getMessage());
+            }
+        }
     }
 
 

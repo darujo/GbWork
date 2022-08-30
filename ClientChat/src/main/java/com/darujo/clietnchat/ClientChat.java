@@ -7,6 +7,7 @@ import com.darujo.clietnchat.controller.ClientCharController;
 import com.darujo.clietnchat.dialogs.Dialogs;
 import com.darujo.command.object.UserPublic;
 import com.darujo.network.NetError;
+import com.darujo.network.Network;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -44,6 +45,10 @@ public class ClientChat extends Application {
         Scene scene = new Scene(chatWindow.load());
         chatStage.setTitle("Чат DARu");
         chatStage.setScene(scene);
+        chatStage.setOnCloseRequest(windowEvent ->   {
+            Network.getNetwork().close();
+            chatStage.close();
+        });
     }
 
     private void initAuthDialog() throws IOException {
@@ -56,7 +61,10 @@ public class ClientChat extends Application {
         authStage.initModality(Modality.WINDOW_MODAL);
         authStage.setScene(new Scene(authDialogPanel));
         authStage.setTitle("Авторизация в чат DARu");
-        authStage.setOnCloseRequest(windowEvent -> chatStage.close());
+        authStage.setOnCloseRequest(windowEvent -> {
+            Network.getNetwork().close();
+            chatStage.close();
+        });
     }
 
     private void initChangeNikDialog() throws IOException {
@@ -169,6 +177,7 @@ public class ClientChat extends Application {
     }
 
     public static void showMessage(String message) {
+        System.out.println(message);
         Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
     }
 
