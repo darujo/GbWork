@@ -16,6 +16,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
@@ -30,7 +32,7 @@ public class ClientChat extends Application {
     private FXMLLoader changeNikWindow;
     private FXMLLoader changePasswordWindow;
     private static ClientChat INSTANCE;
-
+    private static final Logger LOGGER = LogManager.getLogger(Network.class);
     @Override
     public void start(Stage stagePrimary) throws IOException {
         chatStage = stagePrimary;
@@ -177,7 +179,7 @@ public class ClientChat extends Application {
     }
 
     public static void showMessage(String message) {
-        System.out.println(message);
+        LOGGER.warn( message);
         Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
     }
 
