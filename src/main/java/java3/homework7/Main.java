@@ -1,13 +1,13 @@
-package java3.homework6;
+package java3.homework7;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
-        Class testClass = Class.forName("java3.homework6.Test1");
+        Class testClass = Class.forName("java3.homework7.Test1");
         start(testClass);
-        start(Class.forName("java3.homework6.Test2"));
+        start(Class.forName("java3.homework7.Test2"));
     }
     public static void start(Class testClass) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
         Method [] methods = testClass.getDeclaredMethods();

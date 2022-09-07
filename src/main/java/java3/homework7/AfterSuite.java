@@ -1,4 +1,4 @@
-package java3.homework6;
+package java3.homework7;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,5 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Test {
-    int priority () default 5;
+public @interface AfterSuite {
 }
