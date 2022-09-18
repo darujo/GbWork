@@ -71,7 +71,7 @@ public class ClientCharController {
                 }
                 sendMessageText.setText("");
             } else {
-                ClientChat.showMessage("Не выбран получатель");
+                ClientChat.showWarn("Не выбран получатель");
             }
         }
         requestFocus();

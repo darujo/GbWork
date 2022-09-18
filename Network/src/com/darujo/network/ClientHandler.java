@@ -1,12 +1,15 @@
 package com.darujo.network;
 
 import com.darujo.command.Command;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Optional;
 import java.util.Set;
 
 public class ClientHandler {
@@ -17,14 +20,14 @@ public class ClientHandler {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private final Set<ReaderMessage> listeners;
-
-
+    private static final Logger LOGGER = LogManager.getLogger(ClientHandler.class);
     private final Network network;
 
     public ClientHandler(Socket clientSocket, Network network, Set<ReaderMessage> listeners) {
         this.listeners = listeners;
         this.clientSocket = clientSocket;
         this.network = network;
+
     }
 
     public void handle(Boolean isServer) throws IOException {
@@ -44,6 +47,7 @@ public class ClientHandler {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Command obj = readCommand();
+                    LOGGER.info("Получена команда " + (obj != null ? obj.getType() : "") );
                     for (ReaderMessage listener : listeners) {
                         listener.processMessage(this, obj);
                     }
@@ -59,7 +63,7 @@ public class ClientHandler {
                     close(!Thread.currentThread().isInterrupted());
 
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.error("{} {}",e.getMessage(),e.getStackTrace());
                 }
             }
         });
@@ -70,9 +74,11 @@ public class ClientHandler {
 
             try {
                 outputStream.writeObject(command);
+                LOGGER.info("Отправлена комманда " + command.getType());
             } catch (IOException e) {
                 network.printErrorLog(NetError.SEND_MESSAGE);
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getStackTrace());
                 throw e;
             }
         }
@@ -84,7 +90,7 @@ public class ClientHandler {
 
     public void close(boolean reLoad) throws IOException {
         if (connected) {
-            System.out.println("Закрываем соединение. " + this);
+           LOGGER.info("Закрываем соединение. " + this);
             if (reLoad) {
                 Network.getNetwork().removeClientHandler(this);
             }
@@ -99,7 +105,6 @@ public class ClientHandler {
             return (Command) inputStream.readObject();
         } catch (ClassNotFoundException e) {
             network.printErrorLog(NetError.BAD_OBJECT);
-//            e.printStackTrace();
         }
         return null;
     }

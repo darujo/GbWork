@@ -122,11 +122,11 @@ public class AuthController {
                 this.clientHandler = (ClientHandler) event.getData();
 
             } else if (event.getEventType() == EventType.REMOVE_CLIENT_HANDLER) {
-                if (this.clientHandler.equals(event.getData())) {
+                if (this.clientHandler == null || this.clientHandler.equals(event.getData())) {
                     this.clientHandler = null;
                     Platform.runLater(() -> {
                         ClientChat.getInstance().authShow();
-                        ClientChat.showMessage("Потеряна связь с сервером");
+                        ClientChat.showWarn("Потеряна связь с сервером");
                     });
                 }
             }

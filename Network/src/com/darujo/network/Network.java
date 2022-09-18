@@ -3,6 +3,8 @@ package com.darujo.network;
 import com.darujo.event.Event;
 import com.darujo.event.EventType;
 import com.darujo.event.ReaderEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,7 +25,7 @@ public class Network {
     private ClientHandler lastClientHandler;
     private final Set<ClientHandler> clientHandlers = new HashSet<>();
     private final Set<ReaderEvent> eventListeners = new HashSet<>();
-
+    private final Logger LOGGER = LogManager.getLogger(Network.class);
     private static Network instance;
 
     public final ExecutorService executorService;
@@ -46,21 +48,22 @@ public class Network {
 
     public void createSocketServer() {
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
-            System.out.println("Сервер запущен.");
+            LOGGER.info("Сервер запущен.");
             while (true) {
-                System.out.println("Ожидаем подключения.");
+                LOGGER.info("Ожидаем подключения.");
                 socket = serverSocket.accept();
-                System.out.println("Клиент подключился. " + workSocket(false));
+                LOGGER.info("Клиент подключился. {}", workSocket(false));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getStackTrace());
         }
     }
 
     public ClientHandler createSocketClient() {
         try {
             socket = new Socket(SERVER_ADR, SERVER_PORT);
-            System.out.println("Сооединение с " + SERVER_ADR + ":" + SERVER_PORT + " установлено.");
+            LOGGER.info("Сооединение с {}: {} установлено.", SERVER_ADR, SERVER_PORT);
             lastClientHandler = workSocket(true);
             return lastClientHandler;
         } catch (IOException e) {
@@ -87,7 +90,7 @@ public class Network {
         if (logErrorPrinter != null) {
             logErrorPrinter.print(netError, text);
         }
-        System.out.println(text);
+        LOGGER.warn(text);
 
     }
 

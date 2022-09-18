@@ -85,4 +85,5 @@ public class Command implements Serializable {
         return new Command(CommandType.USER_DATA_CHANGE_OK, new ChangeUserDataOkCommandData(userPublic));
     }
 
+
 }

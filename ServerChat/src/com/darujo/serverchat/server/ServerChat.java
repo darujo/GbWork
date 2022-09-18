@@ -9,6 +9,8 @@ import com.darujo.network.ClientHandler;
 import com.darujo.network.Network;
 import com.darujo.serverchat.server.auth.AuthCenter;
 import com.darujo.serverchat.server.auth.User;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,6 +21,7 @@ public class ServerChat {
     private final long TIMER_OUT_AUTH = 120; // seconds
     private final long TIMER_EXECUTION_FREQUENCY = 5; // seconds
     private Timer timer;
+    private final Logger LOGGER = LogManager.getLogger(Network.class);
 
     public ServerChat() {
         Network network = Network.getNetwork();
@@ -36,11 +39,13 @@ public class ServerChat {
                     registrationAndSendAnswer(clientHandler, (RegistrationUser) command.getData());
                 }else if (command.getType() == CommandType.USER_CHANGE) {
                     setNotAuth(clientHandler);
+                    createTimer();
                 } else if (command.getType() == CommandType.USER_DATA_CHANGE) {
                     changeUserData(clientHandler,(ChangeUserData) command.getData());
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getStackTrace());
             }
         });
         network.addReaderEvent(event -> {
@@ -52,7 +57,8 @@ public class ServerChat {
                     removeClient((ClientHandler) event.getData());
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getStackTrace());
             }
         });
         try {
@@ -79,14 +85,13 @@ public class ServerChat {
             TimerTask timerTask = new TimerTask() {
                 @Override
                 public void run() {
-
                     disconnectNotAuthUserTimeOut();
                 }
 
             };
             timer = new Timer(true);
             timer.scheduleAtFixedRate(timerTask, 0, TIMER_EXECUTION_FREQUENCY * 1000);
-            System.out.println("Запущен процесс отключения по таймауту аунтификации.");
+            LOGGER.info("Запущен процесс отключения по таймауту аунтификации.");
         }
     }
 
@@ -100,12 +105,13 @@ public class ServerChat {
                     ClientHandler clientHandler = connectClient.getKey();
                     try {
                         clientHandler.sendCommand(Command.getErrorMessageCommand("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."));
-                        System.out.println("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."
+                        LOGGER.warn("Превышен таймаут " + TIMER_OUT_AUTH + " секунд на авторизацию."
                                 + " Время подключения " + new Date(paramConnectClient.getConnectTime())
                                 + " текущее время " + new Date(System.currentTimeMillis()));
-                        clientHandler.close();
+                        clientHandler.close(true);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage());
+                        LOGGER.error(e.getStackTrace());
                     }
                 }
             }
@@ -119,7 +125,7 @@ public class ServerChat {
     private void stopTimer() {
         timer.cancel();
         timer = null;
-        System.out.println("Остановлен процесс отключения пользователей");
+        LOGGER.info("Остановлен процесс отключения пользователей");
 
     }
 
