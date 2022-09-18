@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Optional;
 import java.util.Set;
 
 public class ClientHandler {
@@ -19,7 +20,7 @@ public class ClientHandler {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private final Set<ReaderMessage> listeners;
-    private static final Logger LOGGER = LogManager.getLogger(Network.class);
+    private static final Logger LOGGER = LogManager.getLogger(ClientHandler.class);
     private final Network network;
 
     public ClientHandler(Socket clientSocket, Network network, Set<ReaderMessage> listeners) {
@@ -46,7 +47,7 @@ public class ClientHandler {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Command obj = readCommand();
-                    LOGGER.info("Получена команда " + (obj != null ? obj.getType() : ""));
+                    LOGGER.info("Получена команда " + (obj != null ? obj.getType() : "") );
                     for (ReaderMessage listener : listeners) {
                         listener.processMessage(this, obj);
                     }
@@ -62,8 +63,7 @@ public class ClientHandler {
                     close(!Thread.currentThread().isInterrupted());
 
                 } catch (IOException e) {
-                    LOGGER.error(e.getMessage());
-                    LOGGER.error(e.getStackTrace());
+                    LOGGER.error("{} {}",e.getMessage(),e.getStackTrace());
                 }
             }
         });

@@ -52,7 +52,7 @@ public class Network {
             while (true) {
                 LOGGER.info("Ожидаем подключения.");
                 socket = serverSocket.accept();
-                LOGGER.info("Клиент подключился. " + workSocket(false));
+                LOGGER.info("Клиент подключился. {}", workSocket(false));
             }
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
@@ -63,7 +63,7 @@ public class Network {
     public ClientHandler createSocketClient() {
         try {
             socket = new Socket(SERVER_ADR, SERVER_PORT);
-            LOGGER.info("Сооединение с " + SERVER_ADR + ":" + SERVER_PORT + " установлено.");
+            LOGGER.info("Сооединение с {}: {} установлено.", SERVER_ADR, SERVER_PORT);
             lastClientHandler = workSocket(true);
             return lastClientHandler;
         } catch (IOException e) {

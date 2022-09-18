@@ -32,7 +32,7 @@ public class ClientChat extends Application {
     private FXMLLoader changeNikWindow;
     private FXMLLoader changePasswordWindow;
     private static ClientChat INSTANCE;
-    private static final Logger LOGGER = LogManager.getLogger(Network.class);
+    private static final Logger LOGGER = LogManager.getLogger(ClientChat.class);
     @Override
     public void start(Stage stagePrimary) throws IOException {
         chatStage = stagePrimary;
@@ -178,14 +178,14 @@ public class ClientChat extends Application {
         return INSTANCE;
     }
 
-    public static void showMessage(String message) {
+    public static void showWarn(String message) {
         LOGGER.warn( message);
         Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
     }
 
     public static void printNetError(NetError netError, String text) {
         if (netError != NetError.DISCONNECT) {
-            showMessage(text);
+            showWarn(text);
         }
     }
 }

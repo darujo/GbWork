@@ -126,7 +126,7 @@ public class AuthController {
                     this.clientHandler = null;
                     Platform.runLater(() -> {
                         ClientChat.getInstance().authShow();
-                        ClientChat.showMessage("Потеряна связь с сервером");
+                        ClientChat.showWarn("Потеряна связь с сервером");
                     });
                 }
             }
