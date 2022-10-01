@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.darujo.networkstorageclient.controller.NetworkStorageClientController">
+   <bottom>
+      <HBox prefHeight="10.0" prefWidth="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="addButton" mnemonicParsing="false" onAction="#addAction" text="Добавить" />
+            <Button fx:id="delButton" mnemonicParsing="false" onAction="#delAction" text="Удалить" />
+            <Button fx:id="getButton" mnemonicParsing="false" onAction="#getAction" text="Получить" />
+         </children>
+      </HBox>
+   </bottom>
+   <center>
+      <TreeView fx:id="treeDir" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
