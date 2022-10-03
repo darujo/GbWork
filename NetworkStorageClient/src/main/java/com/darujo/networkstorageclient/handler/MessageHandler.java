@@ -1,28 +1,29 @@
 package com.darujo.networkstorageclient.handler;
 
-import com.darujo.MessageTest;
+import com.darujo.comand.Command;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.function.Consumer;
 
-public class MessageHandler extends SimpleChannelInboundHandler<MessageTest> {
-    private final MessageTest message;
+public class MessageHandler extends SimpleChannelInboundHandler<Command> {
+    private final Command command;
     private final Consumer<String> callback;
 
-    public MessageHandler(MessageTest message, Consumer<String> callback) {
-        this.message = message;
+    public MessageHandler(Command command, Consumer<String> callback) {
+        this.command = command;
         this.callback = callback;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext)  {
+        channelHandlerContext.writeAndFlush(command);
         System.out.println("отправка");
-        channelHandlerContext.writeAndFlush(message);
+
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext channelHandlerContext, MessageTest o)  {
+    protected void messageReceived(ChannelHandlerContext channelHandlerContext, Command o)  {
         System.out.println("получено");
         callback.accept(o.toString());
 //        channelHandlerContext.write(new MessageTest("ответ" ,"тест " + o.getMessage() + " " + o.getName()));

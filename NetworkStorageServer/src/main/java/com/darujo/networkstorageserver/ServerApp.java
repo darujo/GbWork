@@ -1,6 +1,6 @@
 package com.darujo.networkstorageserver;
 
-import com.darujo.networkstorageserver.handler.MessageHandler;
+import com.darujo.networkstorageserver.handler.FileWorkingHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -38,7 +38,7 @@ public class ServerApp {
                     ch.pipeline().addLast(
                             new ObjectEncoder(),
                             new ObjectDecoder(MAX_OBJECT_SIZE, ClassResolvers.cacheDisabled(null)),
-                            new MessageHandler()
+                            new FileWorkingHandler()
                     );
                 }
             });

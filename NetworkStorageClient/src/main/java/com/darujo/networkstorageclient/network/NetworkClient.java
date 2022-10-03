@@ -1,6 +1,6 @@
 package com.darujo.networkstorageclient.network;
 
-import com.darujo.MessageTest;
+import com.darujo.comand.Command;
 import com.darujo.networkstorageclient.handler.MessageHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -10,6 +10,7 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 public class NetworkClient {
@@ -22,23 +23,19 @@ public class NetworkClient {
         this.port = port;
     }
 
-    public static void main(String[] args) throws InterruptedException {
-//        File file = new File("client/dir/my-file.txt");
+    public static void main(String[] args) throws InterruptedException, IOException {
+        String file = "NetworkStorageClient/dir/my-test-file.txt";
 //        Message message = new Message("put", file, Files.readAllBytes(file.toPath()));
-        MessageTest message =new MessageTest("test1","testing 1") ;
-        new NetworkClient("localhost", 9000).send(message, (response) -> System.out.println("response = " + response));
-//        while (true) {
-//            Scanner scanner = new Scanner(System.in);
-//            if (scanner.nextLine().equals("send")) {
-//                new Client("localhost", 9000).send(message, (response) -> {
-//                    System.out.println("response = " + response);
-//                });
-//            }
-//        }
+//        MessageTest message =new MessageTest("test1","testing 1") ;
+        Command sendFile = Command.getCommandSendFile(file);
+        new NetworkClient("localhost", 9000).send(sendFile, (response) -> System.out.println("response = " + response));
+        file = "NetworkStorageClient/dir";
+        Command listDir = Command.getCommandGetDirList(file);
+        new NetworkClient("localhost", 9000).send(listDir, (response) -> System.out.println("response = " + response));
 
     }
 
-    private void send(MessageTest message, Consumer<String> callback) throws InterruptedException {
+    private void send(Command command, Consumer<String> callback) throws InterruptedException {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
@@ -52,7 +49,7 @@ public class NetworkClient {
                     ch.pipeline().addLast(
                             new ObjectEncoder(),
                             new ObjectDecoder(MAX_OBJECT_SIZE, ClassResolvers.cacheDisabled(null)),
-                            new MessageHandler(message, callback)
+                            new MessageHandler(command, callback)
                     );
                 }
             });
