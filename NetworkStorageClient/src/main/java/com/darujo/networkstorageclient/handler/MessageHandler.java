@@ -8,9 +8,9 @@ import java.util.function.Consumer;
 
 public class MessageHandler extends SimpleChannelInboundHandler<Command> {
     private final Command command;
-    private final Consumer<String> callback;
+    private final Consumer<Command> callback;
 
-    public MessageHandler(Command command, Consumer<String> callback) {
+    public MessageHandler(Command command, Consumer<Command> callback) {
         this.command = command;
         this.callback = callback;
     }
@@ -25,7 +25,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<Command> {
     @Override
     protected void messageReceived(ChannelHandlerContext channelHandlerContext, Command o)  {
         System.out.println("получено");
-        callback.accept(o.toString());
+        callback.accept(o);
 //        channelHandlerContext.write(new MessageTest("ответ" ,"тест " + o.getMessage() + " " + o.getName()));
 
     }

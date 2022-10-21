@@ -15,12 +15,13 @@ import java.util.function.Consumer;
 
 public class NetworkClient {
     private final static int MAX_OBJECT_SIZE = 1024*1024*100;
-    private final String host;
-    private final int port;
+    private static final String HOST = "localhost";
+    private static final int PORT = 9000;
 
+    private static NetworkClient instance;
     public NetworkClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+//        this.host = host;
+//        this.port = port;
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
@@ -31,11 +32,11 @@ public class NetworkClient {
         new NetworkClient("localhost", 9000).send(sendFile, (response) -> System.out.println("response = " + response));
         file = "NetworkStorageClient/dir";
         Command listDir = Command.getCommandGetDirList(file);
-        new NetworkClient("localhost", 9000).send(listDir, (response) -> System.out.println("response = " + response));
+        new NetworkClient(HOST, PORT).send(listDir, (response) -> System.out.println("response = " + response));
 
     }
 
-    private void send(Command command, Consumer<String> callback) throws InterruptedException {
+    public void send(Command command, Consumer<Command> callback) throws InterruptedException {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
@@ -53,10 +54,17 @@ public class NetworkClient {
                     );
                 }
             });
-            ChannelFuture future = client.connect(host, port).sync();
+            ChannelFuture future = client.connect(HOST, PORT).sync();
             future.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();
         }
+    }
+
+    public static NetworkClient getInstance() {
+        if (instance == null){
+            instance = new NetworkClient(HOST,PORT);
+        }
+        return instance;
     }
 }
