@@ -1,16 +1,14 @@
 package com.darujo.networkstorageserver.handler;
 
-import com.darujo.comand.Command;
-import com.darujo.comand.CommandType;
-import com.darujo.comand.commanddata.GetDirListCommandData;
-import com.darujo.comand.commanddata.SendFileCommandData;
+import com.darujo.command.Command;
+import com.darujo.command.CommandType;
+import com.darujo.command.commanddata.GetDirListCommandData;
+import com.darujo.command.commanddata.SendFileCommandData;
 import com.darujo.networkstorageserver.fileworker.FileWork;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import java.io.File;
 
 
 public class FileWorkingHandler extends SimpleChannelInboundHandler<Command> {

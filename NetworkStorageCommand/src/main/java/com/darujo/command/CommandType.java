@@ -1,17 +1,19 @@
-package com.darujo.comand;
+package com.darujo.command;
 
 public enum CommandType {
-//    AUTH,
-//    AUTH_OK,
-//    AUTH_NO_USER,
-//    AUTH_INCORRECT_PASSWORD,
+    AUTH,
+    AUTH_OK,
+    AUTH_NO_USER,
+    AUTH_INCORRECT_PASSWORD,
     SendFile,
     ERROR_MESSAGE,
     INFO_MESSAGE,
     GET_DIR_LIST,
-    DIR_LIST
-
-//    REGISTRATION_USER,
+    DIR_LIST,
+    USER_NAME_IS_BUSY,
+    LOGIN_IS_BUSY,
+    REGISTRATION_USER,
+    FAILED_TOKEN
 //    LOGIN_IS_BUSY,
 //    USER_NAME_IS_BUSY,
 //    USER_CHANGE,

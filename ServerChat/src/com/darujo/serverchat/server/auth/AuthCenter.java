@@ -63,7 +63,7 @@ public class AuthCenter {
     public void addUser(String userName, String login, String password) {
         Connection connection = getConnection();
 
-        try (PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO usersChat (name, login, password) VALUES (?,?,?)")){
+        try (PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO usersStorage (name, login, password) VALUES (?,?,?)")){
             prepInsert.setString(1,userName);
             prepInsert.setString(2,login);
             prepInsert.setString(3,password);
@@ -100,8 +100,8 @@ public class AuthCenter {
     private AuthMessage checkUserName(String userName,Integer userId) {
         Connection connection = getConnection();
         try (PreparedStatement prepInsert = connection.prepareStatement(userId == null ? 
-                                                                       "SELECT login FROM usersChat WHERE  name = ? " :
-                                                                       "SELECT login FROM usersChat WHERE  name = ? and id != ? "
+                                                                       "SELECT login FROM usersStorage WHERE  name = ? " :
+                                                                       "SELECT login FROM usersStorage WHERE  name = ? and id != ? "
                 )){
             prepInsert.setString(1, userName);
             if (userId != null){
@@ -124,7 +124,7 @@ public class AuthCenter {
         Connection connection = getConnection();
         User user = null;
 
-        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT id,name, password FROM usersChat WHERE  login = ? ")){
+        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT id,name, password FROM usersStorage WHERE  login = ? ")){
             prepInsert.setString(1,login);
             ResultSet resultSet = prepInsert.executeQuery();
             while (resultSet.next()){
@@ -143,7 +143,7 @@ public class AuthCenter {
         Connection connection = getConnection();
         User user = null;
 
-        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT login, name, password FROM usersChat WHERE  id = ? ")){
+        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT login, name, password FROM usersStorage WHERE  id = ? ")){
             prepInsert.setInt(1,userId);
             ResultSet resultSet = prepInsert.executeQuery();
             while (resultSet.next()){
@@ -208,7 +208,7 @@ public class AuthCenter {
     private AuthMessage setUserData(int id, String loginNew, String userNameNew, String passwordNew) {
         StringBuilder command;
         boolean first = true;
-        command = new StringBuilder("UPDATE usersChat SET ");
+        command = new StringBuilder("UPDATE usersStorage SET ");
         if (userNameNew!=null){
             command.append("name = ? ");
             first=false;
@@ -224,7 +224,7 @@ public class AuthCenter {
         if (first) {
             return AuthMessage.USER_DATA_NOT_CHANGE;
         }else{
-            command.append("where usersChat.id = ? ");
+            command.append("where usersStorage.id = ? ");
             Connection connection = getConnection();
 
             try (PreparedStatement prepInsert = connection.prepareStatement(command.toString())) {

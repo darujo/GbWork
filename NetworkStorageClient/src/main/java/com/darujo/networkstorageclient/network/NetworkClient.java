@@ -1,6 +1,6 @@
 package com.darujo.networkstorageclient.network;
 
-import com.darujo.comand.Command;
+import com.darujo.command.Command;
 import com.darujo.networkstorageclient.handler.MessageHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;

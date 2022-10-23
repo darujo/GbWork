@@ -1,8 +1,8 @@
 package com.darujo.networkstorageserver.fileworker;
 
-import com.darujo.comand.Command;
-import com.darujo.comand.CommandType;
-import com.darujo.comand.commanddata.SendFileCommandData;
+import com.darujo.command.Command;
+import com.darujo.command.CommandType;
+import com.darujo.command.commanddata.SendFileCommandData;
 
 import java.io.File;
 import java.io.IOException;

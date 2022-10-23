@@ -1,6 +1,6 @@
 package com.darujo.networkstorageclient.handler;
 
-import com.darujo.comand.Command;
+import com.darujo.command.Command;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 

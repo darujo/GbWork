@@ -1,4 +1,4 @@
-package com.darujo.comand.commanddata;
+package com.darujo.command.commanddata;
 
 import java.io.File;
 import java.io.IOException;
