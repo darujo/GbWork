@@ -1,7 +1,7 @@
 package com.darujo.command;
 
 import com.darujo.command.commanddata.DirListCommandData;
-import com.darujo.command.commanddata.GetDirListCommandData;
+import com.darujo.command.commanddata.FileNameCommandData;
 import com.darujo.command.commanddata.MessageCommandData;
 import com.darujo.command.commanddata.SendFileCommandData;
 import com.darujo.command.commanddata.AuthCommandData;
@@ -47,9 +47,11 @@ public class Command implements Serializable {
     }
 
     public static Command getCommandSendFile(String fileName) throws IOException {
-        return new Command(CommandType.SendFile, new SendFileCommandData(fileName));
+        return new Command(CommandType.SEND_FILE, new SendFileCommandData(fileName));
     }
-
+    public static Command getCommandGetSendFile(String fileName)  {
+        return new Command(CommandType.GET_SEND_FILE, new FileNameCommandData(fileName));
+    }
     public static Command getCommandErrorMessage(String text) {
         return new Command(CommandType.ERROR_MESSAGE, new MessageCommandData(text));
     }
@@ -59,7 +61,7 @@ public class Command implements Serializable {
     }
 
     public static Command getCommandGetDirList(String dirName) {
-        return new Command(CommandType.GET_DIR_LIST, new GetDirListCommandData(dirName));
+        return new Command(CommandType.GET_DIR_LIST, new FileNameCommandData(dirName));
     }
 
     public static Command getCommandDirList(String dirName, File[] files) {

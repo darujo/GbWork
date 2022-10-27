@@ -2,7 +2,7 @@ package com.darujo.networkstorageserver.handler;
 
 import com.darujo.command.Command;
 import com.darujo.command.CommandType;
-import com.darujo.command.commanddata.GetDirListCommandData;
+import com.darujo.command.commanddata.FileNameCommandData;
 import com.darujo.command.commanddata.SendFileCommandData;
 import com.darujo.networkstorageserver.fileworker.FileWork;
 import io.netty.channel.ChannelFuture;
@@ -14,27 +14,27 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class FileWorkingHandler extends SimpleChannelInboundHandler<Command> {
 
     @Override
-    public void channelActive(ChannelHandlerContext channelHandlerContext)  {
+    public void channelActive(ChannelHandlerContext channelHandlerContext) {
         System.out.println("подключен");
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext channelHandlerContext, Command command)  {
+    protected void messageReceived(ChannelHandlerContext channelHandlerContext, Command command) {
         System.out.println("отвечаем");
         Command answerCommand = null;
-        if (command.getType() == CommandType.SendFile) {
+        if (command.getType() == CommandType.SEND_FILE) {
             answerCommand = FileWork.saveFile((SendFileCommandData) command.getData());
-        } else if(command.getType() == CommandType.GET_DIR_LIST){
-            answerCommand = FileWork.getDirList(((GetDirListCommandData) command.getData()).getDirName());
+        } else if (command.getType() == CommandType.GET_DIR_LIST) {
+            answerCommand = FileWork.getDirList(((FileNameCommandData) command.getData()).getDirName());
         }
 
         System.out.println("отвечаем");
 
         ChannelFuture future;
         if (answerCommand != null) {
-           future =channelHandlerContext.writeAndFlush(answerCommand);
+            future = channelHandlerContext.writeAndFlush(answerCommand);
         } else {
-            future =channelHandlerContext.writeAndFlush(Command.getCommandMessage(CommandType.ERROR_MESSAGE,"Пустая команда ответа"));
+            future = channelHandlerContext.writeAndFlush(Command.getCommandMessage(CommandType.ERROR_MESSAGE, "Пустая команда ответа"));
         }
         future.addListener(ChannelFutureListener.CLOSE);
     }

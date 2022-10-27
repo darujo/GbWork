@@ -2,10 +2,10 @@ package com.darujo.command.commanddata;
 
 import java.io.Serializable;
 
-public class GetDirListCommandData implements Serializable {
+public class FileNameCommandData implements Serializable {
     private final String dirName;
 
-    public GetDirListCommandData(String text) {
+    public FileNameCommandData(String text) {
         this.dirName = text;
     }
 
