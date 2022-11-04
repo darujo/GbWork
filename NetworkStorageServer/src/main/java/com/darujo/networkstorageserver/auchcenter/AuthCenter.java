@@ -1,5 +1,6 @@
 package com.darujo.networkstorageserver.auchcenter;
 
+import java.nio.file.Path;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -63,7 +64,7 @@ public class AuthCenter {
         connectDBs.put(connection, false);
     }
 
-    public void addUser(String userName, String login, String password) {
+    public void addUser(String userName, String login, String password) throws SQLException {
         Connection connection = getConnection();
 
         try (PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO usersStorage (name, login, password) VALUES (?,?,?)")) {
@@ -71,8 +72,6 @@ public class AuthCenter {
             prepInsert.setString(2, login);
             prepInsert.setString(3, password);
             prepInsert.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         } finally {
             disableConnect(connection);
         }
@@ -83,28 +82,37 @@ public class AuthCenter {
         if (user == null) {
             return AuthMessage.INVALID_LOGIN;
         } else {
-            if (password.equals(user.getPassword())){
-                setToken(user.getId());
+            if (password.equals(user.getPassword())) {
+                try {
+                    setToken(user.getId());
+                } catch (SQLException e) {
+                    return AuthMessage.AUTH_SQL_ERROR;
+                }
                 return AuthMessage.AUTH_OK;
             }
-            return  AuthMessage.INVALID_PASSWORD;
+            return AuthMessage.INVALID_PASSWORD;
         }
     }
 
     public AuthMessage registrationUser(String login, String password, String userName) {
         User user = getUser(login);
         if (user == null) {
-            AuthMessage userNameIsBusy = checkUserName(userName, null);
-            if (userNameIsBusy != null) return userNameIsBusy;
-            addUser(userName, login, password);
-            setToken(login);
+            try {
+                AuthMessage userNameIsBusy = checkUserName(userName, null);
+                if (userNameIsBusy != null) return userNameIsBusy;
+
+                addUser(userName, login, password);
+                setToken(login);
+            } catch (SQLException e) {
+                return AuthMessage.AUTH_SQL_ERROR;
+            }
             return AuthMessage.AUTH_OK;
         } else {
             return AuthMessage.LOGIN_IS_BUSY;
         }
     }
 
-    private AuthMessage checkUserName(String userName, Integer userId) {
+    private AuthMessage checkUserName(String userName, Integer userId) throws SQLException {
         Connection connection = getConnection();
         try (PreparedStatement prepInsert = connection.prepareStatement(userId == null ?
                 "SELECT login FROM usersStorage WHERE  name = ? " :
@@ -118,8 +126,6 @@ public class AuthCenter {
             if (resultSet.next()) {
                 return AuthMessage.USER_NAME_IS_BUSY;
             }
-        } catch (SQLException e) {
-            return AuthMessage.AUTH_SQL_ERROR;
         } finally {
             disableConnect(connection);
         }
@@ -135,20 +141,20 @@ public class AuthCenter {
             ResultSet resultSet = prepInsert.executeQuery();
             while (resultSet.next()) {
                 user = new User(resultSet.getInt("id"),
-                                resultSet.getString("name"),
-                                login,
-                                resultSet.getString("password"),
-                                resultSet.getString("token"));
+                        resultSet.getString("name"),
+                        login,
+                        resultSet.getString("password"),
+                        resultSet.getString("token"));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return null;
         } finally {
             disableConnect(connection);
         }
         return user;
     }
 
-    public User getUser(int userId) {
+    private User getUser(int userId) throws SQLException {
         Connection connection = getConnection();
         User user = null;
 
@@ -157,18 +163,17 @@ public class AuthCenter {
             ResultSet resultSet = prepInsert.executeQuery();
             while (resultSet.next()) {
                 user = new User(userId,
-                                resultSet.getString("name"),
-                                resultSet.getString("login"),
-                                resultSet.getString("password"),
-                                resultSet.getString("token"));
+                        resultSet.getString("name"),
+                        resultSet.getString("login"),
+                        resultSet.getString("password"),
+                        resultSet.getString("token"));
             }
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         } finally {
             disableConnect(connection);
         }
         return user;
+
     }
 
 
@@ -195,28 +200,32 @@ public class AuthCenter {
     }
 
     public AuthMessage changeUserData(int id, String loginNew, String passwordOld, String passwordNew, String userNameNew) {
-        User user = getUser(id);
-        if (user == null) {
-            return AuthMessage.AUTH_SQL_ERROR;
-        } else if (passwordNew != null) {
-            if (!user.getPassword().equals(passwordOld)) {
-                return AuthMessage.INVALID_PASSWORD;
+        try {
+            User user = getUser(id);
+            if (user == null) {
+                return AuthMessage.AUTH_SQL_ERROR;
+            } else if (passwordNew != null) {
+                if (!user.getPassword().equals(passwordOld)) {
+                    return AuthMessage.INVALID_PASSWORD;
+                }
             }
-        }
-        if (userNameNew != null && !user.getUserName().equals(userNameNew)) {
-            AuthMessage authMessage = checkUserName(userNameNew, id);
-            if (authMessage != null) return authMessage;
-        } else
-            userNameNew = null;
-        if (loginNew != null && !user.getLogin().equals(loginNew)) {
-            User userLogin = getUser(loginNew);
-            if (userLogin != null) return AuthMessage.LOGIN_IS_BUSY;
-        } else
-            loginNew = null;
-        if (user.getPassword().equals(passwordNew)) {
-            passwordNew = null;
-        }
+            if (userNameNew != null && !user.getUserName().equals(userNameNew)) {
+                AuthMessage authMessage = checkUserName(userNameNew, id);
 
+                if (authMessage != null) return authMessage;
+            } else
+                userNameNew = null;
+            if (loginNew != null && !user.getLogin().equals(loginNew)) {
+                User userLogin = getUser(loginNew);
+                if (userLogin != null) return AuthMessage.LOGIN_IS_BUSY;
+            } else
+                loginNew = null;
+            if (user.getPassword().equals(passwordNew)) {
+                passwordNew = null;
+            }
+        } catch (SQLException e) {
+            return AuthMessage.AUTH_SQL_ERROR;
+        }
 
         return setUserData(id, loginNew, userNameNew, passwordNew);
     }
@@ -266,39 +275,36 @@ public class AuthCenter {
         }
     }
 
-    public void setToken(int userId) {
+    public void setToken(int userId) throws SQLException {
         Connection connection = getConnection();
 
         try {
             String uuid = getNewUUID(connection);
-            try (PreparedStatement prepInsert = connection.prepareStatement("UPDATE usersStorage SET token = ?, tokenTime = ? where usersStorage.id = ? ")) {
+            try (PreparedStatement prepUpdate = connection.prepareStatement("UPDATE usersStorage SET token = ?, tokenTime = ? where usersStorage.id = ? ")) {
 
-                prepInsert.setString(1, uuid);
-                prepInsert.setString(2, LocalDateTime.now().toString());
-                prepInsert.setInt(3, userId);
-                prepInsert.execute();
+                prepUpdate.setString(1, uuid);
+                prepUpdate.setString(2, LocalDateTime.now().toString());
+                prepUpdate.setInt(3, userId);
+                prepUpdate.execute();
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         } finally {
             disableConnect(connection);
         }
     }
-    public void setToken(String login) {
+
+    public void setToken(String login) throws SQLException {
         Connection connection = getConnection();
 
         try {
             String uuid = getNewUUID(connection);
-            try (PreparedStatement prepInsert = connection.prepareStatement("UPDATE usersStorage SET token = ?, tokenTime = ? where usersStorage.login = ? ")) {
+            try (PreparedStatement prepUpdate = connection.prepareStatement("UPDATE usersStorage SET token = ?, tokenTime = ? where usersStorage.login = ? ")) {
 
-                prepInsert.setString(1, uuid);
-                prepInsert.setString(2, LocalDateTime.now().toString());
-                prepInsert.setString(3, login);
-                prepInsert.execute();
+                prepUpdate.setString(1, uuid);
+                prepUpdate.setString(2, LocalDateTime.now().toString());
+                prepUpdate.setString(3, login);
+                prepUpdate.execute();
 
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         } finally {
             disableConnect(connection);
         }
@@ -310,9 +316,9 @@ public class AuthCenter {
         boolean guidAvail = true;
         while (guidAvail) {
             uuid = UUID.randomUUID().toString();
-            try (PreparedStatement prepInsert = connection.prepareStatement("SELECT token  FROM usersStorage WHERE  token = ? ")) {
-                prepInsert.setString(1, uuid);
-                ResultSet resultSet = prepInsert.executeQuery();
+            try (PreparedStatement prepSelect = connection.prepareStatement("SELECT token  FROM usersStorage WHERE  token = ? ")) {
+                prepSelect.setString(1, uuid);
+                ResultSet resultSet = prepSelect.executeQuery();
                 guidAvail = resultSet.next();
 
             }
@@ -320,18 +326,15 @@ public class AuthCenter {
         return uuid;
     }
 
-    public void setTokenTime(String token) {
+    public void setTokenTime(String token) throws SQLException {
         Connection connection = getConnection();
 
-        try (PreparedStatement prepInsert = connection.prepareStatement("UPDATE usersStorage SET tokenTime = ? where token = ? ")) {
+        try (PreparedStatement prepUpdate = connection.prepareStatement("UPDATE usersStorage SET tokenTime = ? where token = ? ")) {
 
-            prepInsert.setString(1, LocalDateTime.now().toString());
-            prepInsert.setString(2, token);
+            prepUpdate.setString(1, LocalDateTime.now().toString());
+            prepUpdate.setString(2, token);
 
-            prepInsert.execute();
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            prepUpdate.execute();
 
         } finally {
             disableConnect(connection);
@@ -340,9 +343,9 @@ public class AuthCenter {
 
     public boolean checkToken(String token) {
         Connection connection = getConnection();
-        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT tokentime  FROM usersStorage WHERE  token = ? ")) {
-            prepInsert.setString(1, token);
-            ResultSet resultSet = prepInsert.executeQuery();
+        try (PreparedStatement prepSelect = connection.prepareStatement("SELECT tokentime  FROM usersStorage WHERE  token = ? ")) {
+            prepSelect.setString(1, token);
+            ResultSet resultSet = prepSelect.executeQuery();
             LocalDateTime localDateTime = null;
             while (resultSet.next()) {
                 localDateTime = LocalDateTime.parse(resultSet.getString("tokentime"));
@@ -350,7 +353,7 @@ public class AuthCenter {
             if (localDateTime != null) {
 
                 boolean tokenOK = LocalDateTime.now().isBefore(localDateTime.plusMinutes(AVAIL_TOKEN_MIN));
-                if (tokenOK){
+                if (tokenOK) {
                     setTokenTime(token);
                 }
                 return tokenOK;
@@ -359,9 +362,210 @@ public class AuthCenter {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return false;
         } finally {
             disableConnect(connection);
+        }
+
+    }
+
+    public Integer getUserId(String token) {
+        Connection connection = getConnection();
+        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT id FROM usersStorage WHERE  token = ? ")) {
+            prepInsert.setString(1, token);
+            ResultSet resultSet = prepInsert.executeQuery();
+            while (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+            return null;
+        } catch (SQLException e) {
+            return null;
+        } finally {
+            disableConnect(connection);
+        }
+
+    }
+
+    public String getShareGuid(Integer ownerId, String file) {
+
+        Connection connection = getConnection();
+        String query;
+        if (ownerId == null) {
+            query = "SELECT shareGuid FROM shareStorage WHERE  shareFile = ?";
+        } else {
+            query = "SELECT shareGuid FROM shareStorage WHERE  shareFile = ?  and ownerId = ?";
+        }
+        try (PreparedStatement prepInsert = connection.prepareStatement(query)) {
+
+            prepInsert.setString(1, file);
+            if (ownerId != null) {
+                prepInsert.setInt(2, ownerId);
+            }
+            ResultSet resultSet = prepInsert.executeQuery();
+            while (resultSet.next()) {
+                return resultSet.getString("shareGuid");
+            }
+            return null;
+        } catch (SQLException e) {
+            return "";
+        } finally {
+            disableConnect(connection);
+        }
+
+    }
+
+    public String getShareFile(Integer ownerId, String guid) throws SQLException {
+        Connection connection = getConnection();
+        String query;
+        if (ownerId == null) {
+            query = "SELECT shareFile FROM shareStorage WHERE  shareGuid = ?";
+        } else {
+            query = "SELECT shareFile FROM shareStorage WHERE  shareGuid = ?  and ownerId = ?";
+        }
+        try (PreparedStatement prepInsert = connection.prepareStatement(query)) {
+            prepInsert.setString(1, guid);
+            if (ownerId != null) {
+                prepInsert.setInt(2, ownerId);
+            }
+
+            ResultSet resultSet = prepInsert.executeQuery();
+            while (resultSet.next()) {
+                return resultSet.getString("shareFile");
+            }
+            delShareLink(guid);
+            return null;
+        } finally {
+            disableConnect(connection);
+        }
+
+    }
+
+    private String getNewShareGuid(Connection connection) throws SQLException {
+        String uuid = null;
+        boolean guidAvail = true;
+        while (guidAvail) {
+            uuid = UUID.randomUUID().toString();
+            try (PreparedStatement prepSelect = connection.prepareStatement("SELECT shareGuid FROM shareStorage WHERE  shareGuid = ? ")) {
+                prepSelect.setString(1, uuid);
+                ResultSet resultSet = prepSelect.executeQuery();
+                guidAvail = resultSet.next();
+
+            }
+        }
+        return uuid;
+    }
+
+
+    public String addShareFile(int ownerId, String shareFile) throws SQLException {
+        Connection connection = getConnection();
+        try {
+            String newShareGuid = getNewShareGuid(connection);
+            try (PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO shareStorage (ownerId, shareGuid, shareFile) VALUES (?,?,?)")) {
+                prepInsert.setInt(1, ownerId);
+                prepInsert.setString(2, newShareGuid);
+                prepInsert.setString(3, shareFile);
+                prepInsert.execute();
+                return newShareGuid;
+            }
+        } finally {
+            disableConnect(connection);
+        }
+    }
+
+    public String updateShareGuid(int ownerId, String shareFile) throws SQLException {
+        if (getShareGuid(ownerId, shareFile) == null) {
+            return addShareFile(ownerId, shareFile);
+        } else {
+            Connection connection = getConnection();
+            try {
+                String newShareGuid = getNewShareGuid(connection);
+                try (PreparedStatement prepInsert = connection.prepareStatement("UPDATE shareStorage SET  shareGuid = ? where ownerId = ? and shareFile = ? ")) {
+                    prepInsert.setString(1, newShareGuid);
+                    prepInsert.setInt(2, ownerId);
+                    prepInsert.setString(3, shareFile);
+                    prepInsert.execute();
+                    return newShareGuid;
+                }
+            } finally {
+                disableConnect(connection);
+            }
+        }
+    }
+
+    public boolean getShareLink(int userId, String guid) {
+        Connection connection = getConnection();
+        try (PreparedStatement prepInsert = connection.prepareStatement("SELECT shareGuid FROM linkShareStorage WHERE  recipientId = ?  and shareGuid = ?")) {
+            prepInsert.setInt(1, userId);
+            prepInsert.setString(2, guid);
+
+
+            ResultSet resultSet = prepInsert.executeQuery();
+            while (resultSet.next()) {
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            disableConnect(connection);
+        }
+
+    }
+
+    public void delShareLink(String guid) {
+        Connection connection = getConnection();
+        try (PreparedStatement prepInsert = connection.prepareStatement("DELETE FROM linkShareStorage WHERE shareGuid = ?")) {
+            prepInsert.setString(1, guid);
+            prepInsert.execute();
+        } catch (SQLException ignore) {
+        } finally {
+            disableConnect(connection);
+        }
+
+    }
+
+    public void updateShareLink(int userId, String guid) throws SQLException {
+        if (!getShareLink(userId, guid)) {
+            addShareLink(userId, guid);
+        }
+    }
+
+    private void addShareLink(int userId, String guid) throws SQLException {
+        Connection connection = getConnection();
+        try (PreparedStatement prepInsert = connection.prepareStatement("INSERT INTO linkShareStorage (recipientId, shareGuid) VALUES (?,?)")) {
+            prepInsert.setInt(1, userId);
+            prepInsert.setString(2, guid);
+            prepInsert.execute();
+        } finally {
+            disableConnect(connection);
+        }
+    }
+
+    public Map<String, String> getShareLinkDir(int userId) {
+        Map<String, String> dirList = new HashMap<>();
+        Connection connection = getConnection();
+        try (PreparedStatement prepInsert = connection.prepareStatement(
+                "SELECT shareStorage.shareGuid shareGuid, shareFile FROM linkShareStorage,shareStorage where linkShareStorage.recipientId = ? and shareStorage.shareGuid = linkShareStorage.shareGuid")) {
+            prepInsert.setInt(1, userId);
+
+            ResultSet resultSet = prepInsert.executeQuery();
+            while (resultSet.next()) {
+                dirList.put(resultSet.getString("shareGuid"), Path.of(resultSet.getString("shareFile")).toFile().getName());
+            }
+            return dirList;
+        } catch (SQLException e) {
+            return null;
+        } finally {
+            disableConnect(connection);
+        }
+
+    }
+
+    public String getShareFilePath(int userId, String guid) throws SQLException {
+        if (getShareLink(userId, guid)) {
+            return getShareFile(null, guid);
+        } else {
+            return getShareFile(userId, guid);
         }
 
     }

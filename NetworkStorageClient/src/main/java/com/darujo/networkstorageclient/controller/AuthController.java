@@ -2,7 +2,7 @@ package com.darujo.networkstorageclient.controller;
 
 import com.darujo.command.Command;
 import com.darujo.command.commanddata.AuthOkCommandData;
-import com.darujo.command.commanddata.ErrorCommandData;
+import com.darujo.command.commanddata.MessageCommandData;
 import com.darujo.command.object.UserPublic;
 import com.darujo.networkstorageclient.NetworkStorageClient;
 import com.darujo.networkstorageclient.dialogs.Dialogs;
@@ -59,12 +59,12 @@ public class AuthController {
                 break;
             }
             case ERROR_MESSAGE: {
-                String message = ((ErrorCommandData) command.getData()).getText();
+                String message = ((MessageCommandData) command.getData()).getText();
                 Platform.runLater(() -> Dialogs.showDialog(Alert.AlertType.ERROR, "Ошибка", "Ошибка", message));
                 break;
             }
             case LOGIN_IS_BUSY: {
-                String message = ((ErrorCommandData) command.getData()).getText();
+                String message = ((MessageCommandData) command.getData()).getText();
                 Platform.runLater(() -> {
                     badLoginLabel.setVisible(true);
                     loginField.requestFocus();
@@ -74,7 +74,7 @@ public class AuthController {
                 break;
             }
             case USER_NAME_IS_BUSY: {
-                String message = ((ErrorCommandData) command.getData()).getText();
+                String message = ((MessageCommandData) command.getData()).getText();
                 Platform.runLater(() -> {
                     badUserNameLabel.setVisible(true);
                     userNameField.requestFocus();

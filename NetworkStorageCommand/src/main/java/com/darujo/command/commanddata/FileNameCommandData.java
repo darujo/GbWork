@@ -1,20 +1,24 @@
 package com.darujo.command.commanddata;
 
+import com.darujo.command.object.PathFile;
+
 import java.io.Serializable;
 
 public class FileNameCommandData implements Serializable {
-    private final String dirName;
+    private final PathFile filePath;
 
-    public FileNameCommandData(String text) {
-        this.dirName = text;
+    public FileNameCommandData(PathFile pathFile) {
+        this.filePath = pathFile;
     }
 
-    public String getDirName() {
-        return dirName;
+    public PathFile getFilePath() {
+        return filePath;
     }
 
     @Override
     public String toString() {
-        return dirName;
+        return "FileNameCommandData{" +
+                "filePath=" + filePath +
+                '}' + ' ' + super.toString();
     }
 }

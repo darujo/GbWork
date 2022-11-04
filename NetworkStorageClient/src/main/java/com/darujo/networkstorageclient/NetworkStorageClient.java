@@ -1,10 +1,8 @@
 package com.darujo.networkstorageclient;
 
-import com.darujo.command.Command;
 import com.darujo.command.object.UserPublic;
 import com.darujo.networkstorageclient.controller.AuthController;
 import com.darujo.networkstorageclient.controller.NetworkStorageClientController;
-import com.darujo.networkstorageclient.network.NetworkClient;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

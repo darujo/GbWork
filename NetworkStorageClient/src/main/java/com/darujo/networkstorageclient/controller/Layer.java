@@ -6,19 +6,26 @@ public class Layer {
     private final String layerName;
 
     private final boolean file;
+    private String guid;
 
-    public Layer(String layerName, boolean isFile) {
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public Layer(String layerName, boolean isFile, String guid) {
         this.layerName = layerName;
         this.file = isFile;
+        this.guid = guid;
+    }
+
+    public String getGuid() {
+        return guid;
     }
 
     public String getLayerName() {
         return layerName;
     }
 
-//    public void setLayerName(String layerName) {
-//        this.layerName = layerName;
-//    }
 
     public boolean isFile() {
         return file;
@@ -27,7 +34,7 @@ public class Layer {
 
     @Override
     public String toString() {
-        return this.layerName;
+        return this.layerName + " " + this.guid;
     }
 
 }

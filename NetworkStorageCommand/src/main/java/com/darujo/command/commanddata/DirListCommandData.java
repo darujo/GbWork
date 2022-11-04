@@ -1,28 +1,21 @@
 package com.darujo.command.commanddata;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.Arrays;
+import com.darujo.command.object.FileInfo;
+import com.darujo.command.object.PathFile;
 
-public class DirListCommandData implements Serializable {
-    private final String dirName;
-    private final File [] files;
+import java.util.Set;
 
-    public DirListCommandData(String dirName, File[] files) {
-        this.dirName = dirName;
+public class DirListCommandData extends FileNameCommandData {
+    private final Set<FileInfo > files;
+
+    public DirListCommandData(PathFile fileName, Set<FileInfo> files) {
+        super(fileName);
         this.files = files;
     }
 
-    public String getDirName() {
-        return dirName;
-    }
 
-    public File[] getFiles() {
+    public Set<FileInfo > getFiles() {
         return files;
     }
 
-    @Override
-    public String toString() {
-        return Arrays.toString(files);
-    }
 }

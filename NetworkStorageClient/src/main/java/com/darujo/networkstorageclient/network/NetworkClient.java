@@ -1,6 +1,7 @@
 package com.darujo.networkstorageclient.network;
 
 import com.darujo.command.Command;
+import com.darujo.command.object.PathFile;
 import com.darujo.networkstorageclient.handler.MessageHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -25,13 +26,13 @@ public class NetworkClient {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        String file = "NetworkStorageClient/dir/my-test-file.txt";
+        String  file = "NetworkStorageClient/dir/my-test-file.txt";
 //        Message message = new Message("put", file, Files.readAllBytes(file.toPath()));
 //        MessageTest message =new MessageTest("test1","testing 1") ;
-        Command sendFile = Command.getCommandSendFile(file);
+        Command sendFile = Command.getSendFileCommand(new PathFile(""),file);
         new NetworkClient("localhost", 9000).send(sendFile, (response) -> System.out.println("response = " + response));
-        file = "NetworkStorageClient/dir";
-        Command listDir = Command.getCommandGetDirList(file);
+        PathFile filePath = new PathFile("NetworkStorageClient/dir");
+        Command listDir = Command.getGetDirListCommand(filePath);
         new NetworkClient(HOST, PORT).send(listDir, (response) -> System.out.println("response = " + response));
 
     }
@@ -56,7 +57,12 @@ public class NetworkClient {
             });
             ChannelFuture future = client.connect(HOST, PORT).sync();
             future.channel().closeFuture().sync();
-        } finally {
+
+        }
+//        catch (RuntimeException exception){
+//            Dialogs.showDialog(Alert.AlertType.ERROR,"1111",null,"2222");
+//        }
+        finally {
             workerGroup.shutdownGracefully();
         }
     }

@@ -3,7 +3,7 @@ package com.darujo.command.commanddata;
 import java.io.Serializable;
 
 public class MessageCommandData implements Serializable {
-    public final String text;
+    private final String text;
 
     public MessageCommandData(String text) {
         this.text = text;

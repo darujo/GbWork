@@ -17,14 +17,15 @@ public class MessageHandler extends SimpleChannelInboundHandler<Command> {
 
     @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext)  {
+        System.out.println("отправка " + command );
         channelHandlerContext.writeAndFlush(command);
-        System.out.println("отправка");
+        System.out.println("отправлена " + command);
 
     }
 
     @Override
     protected void messageReceived(ChannelHandlerContext channelHandlerContext, Command o)  {
-        System.out.println("получено");
+        System.out.println("получено " + o);
         callback.accept(o);
 //        channelHandlerContext.write(new MessageTest("ответ" ,"тест " + o.getMessage() + " " + o.getName()));
 

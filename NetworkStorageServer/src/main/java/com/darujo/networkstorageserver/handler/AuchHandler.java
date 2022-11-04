@@ -28,7 +28,7 @@ public class AuchHandler extends ChannelHandlerAdapter {
                 if (AuthCenter.getInstance().checkToken(command.getToken())){
                     ctx.fireChannelRead(msg);
                 } else {
-                    future = ctx.writeAndFlush(Command.getErrorMessageCommand(CommandType.FAILED_TOKEN,"Токен просрочен, необходима повторная авторизация"));
+                    future = ctx.writeAndFlush(Command.getMessageCommand(CommandType.FAILED_TOKEN,"Токен просрочен, необходима повторная авторизация"));
                 }
             }
 
@@ -68,7 +68,7 @@ public class AuchHandler extends ChannelHandlerAdapter {
             } else {
               commandType = CommandType.ERROR_MESSAGE;
             }
-            return Command.getErrorMessageCommand(commandType, authMessage.getMessage());
+            return Command.getMessageCommand(commandType, authMessage.getMessage());
         }
     }
 
