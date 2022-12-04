@@ -1,6 +1,7 @@
 package com.darujo.networkstorageclient.network;
 
-import com.darujo.comand.Command;
+import com.darujo.command.Command;
+import com.darujo.command.object.PathFile;
 import com.darujo.networkstorageclient.handler.MessageHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -15,27 +16,28 @@ import java.util.function.Consumer;
 
 public class NetworkClient {
     private final static int MAX_OBJECT_SIZE = 1024*1024*100;
-    private final String host;
-    private final int port;
+    private static final String HOST = "localhost";
+    private static final int PORT = 9000;
 
+    private static NetworkClient instance;
     public NetworkClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+//        this.host = host;
+//        this.port = port;
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        String file = "NetworkStorageClient/dir/my-test-file.txt";
+        String  file = "NetworkStorageClient/dir/my-test-file.txt";
 //        Message message = new Message("put", file, Files.readAllBytes(file.toPath()));
 //        MessageTest message =new MessageTest("test1","testing 1") ;
-        Command sendFile = Command.getCommandSendFile(file);
+        Command sendFile = Command.getSendFileCommand(new PathFile(""),file);
         new NetworkClient("localhost", 9000).send(sendFile, (response) -> System.out.println("response = " + response));
-        file = "NetworkStorageClient/dir";
-        Command listDir = Command.getCommandGetDirList(file);
-        new NetworkClient("localhost", 9000).send(listDir, (response) -> System.out.println("response = " + response));
+        PathFile filePath = new PathFile("NetworkStorageClient/dir");
+        Command listDir = Command.getGetDirListCommand(filePath);
+        new NetworkClient(HOST, PORT).send(listDir, (response) -> System.out.println("response = " + response));
 
     }
 
-    private void send(Command command, Consumer<String> callback) throws InterruptedException {
+    public void send(Command command, Consumer<Command> callback) throws InterruptedException {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
@@ -53,10 +55,22 @@ public class NetworkClient {
                     );
                 }
             });
-            ChannelFuture future = client.connect(host, port).sync();
+            ChannelFuture future = client.connect(HOST, PORT).sync();
             future.channel().closeFuture().sync();
-        } finally {
+
+        }
+//        catch (RuntimeException exception){
+//            Dialogs.showDialog(Alert.AlertType.ERROR,"1111",null,"2222");
+//        }
+        finally {
             workerGroup.shutdownGracefully();
         }
+    }
+
+    public static NetworkClient getInstance() {
+        if (instance == null){
+            instance = new NetworkClient(HOST,PORT);
+        }
+        return instance;
     }
 }

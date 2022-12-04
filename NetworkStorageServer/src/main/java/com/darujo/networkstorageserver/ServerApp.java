@@ -1,5 +1,7 @@
 package com.darujo.networkstorageserver;
 
+import com.darujo.networkstorageserver.auchcenter.AuthCenter;
+import com.darujo.networkstorageserver.handler.AuchHandler;
 import com.darujo.networkstorageserver.handler.FileWorkingHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -38,6 +40,7 @@ public class ServerApp {
                     ch.pipeline().addLast(
                             new ObjectEncoder(),
                             new ObjectDecoder(MAX_OBJECT_SIZE, ClassResolvers.cacheDisabled(null)),
+                            new AuchHandler(),
                             new FileWorkingHandler()
                     );
                 }
@@ -45,6 +48,7 @@ public class ServerApp {
             ChannelFuture future = server.bind(port).sync();
             future.channel().closeFuture().sync();
         } finally {
+            AuthCenter.close();
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

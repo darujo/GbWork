@@ -3,34 +3,38 @@ package com.darujo.networkstorageclient.controller;
 public class Layer {
 
 
-    private String layerName;
+    private final String layerName;
 
-    private boolean selected;
+    private final boolean file;
+    private String guid;
 
-    public Layer(String layerName, boolean selected) {
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public Layer(String layerName, boolean isFile, String guid) {
         this.layerName = layerName;
-        this.selected = selected;
+        this.file = isFile;
+        this.guid = guid;
+    }
+
+    public String getGuid() {
+        return guid;
     }
 
     public String getLayerName() {
         return layerName;
     }
 
-    public void setLayerName(String layerName) {
-        this.layerName = layerName;
+
+    public boolean isFile() {
+        return file;
     }
 
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
 
     @Override
     public String toString() {
-        return this.layerName + this.selected;
+        return this.layerName + " " + this.guid;
     }
 
 }
